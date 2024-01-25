@@ -1,0 +1,10 @@
+#vertLabel {
+    -fx-height: 60px;
+    -fx-width: 60px;
+    -fx-border-color: black;
+    -fx-border-radius: 100px;
+    -fx-label-padding: 15px;
+    -fx-background-radius: 100px;
+    -fx-background-color: white;
+    -fx-alignment: CENTER;
+}
