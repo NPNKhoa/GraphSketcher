@@ -4,7 +4,6 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-
 import java.util.*;
 
 public abstract class Graph {
@@ -27,19 +26,6 @@ public abstract class Graph {
         }
 
         generateRandomUniqueColor(colors);
-    }
-
-    /**
-     * Generate random color and make it unique
-     */
-    private void generateRandomUniqueColor(Set<Color> colors) {
-        double red = Math.random();
-        double green = Math.random();
-        double blue = Math.random();
-
-        Color randomColor = new Color(red, green, blue, 1.0);
-
-        colors.add(randomColor);
     }
 
     /**
@@ -74,18 +60,8 @@ public abstract class Graph {
         return this.edges;
     }
 
-    public void addVert(MouseEvent mouseEvent) {
 
-    }
-
-    public Label createVertLabel(MouseEvent mouseEvent) {
-        Label vertLabel = new Label(vertName.getFirst());
-        vertLabel.setFont(new Font("System Bold", 24));
-        vertLabel.setId("vertLabel");
-        vertLabel.setLayoutX(vertLabel.getWidth()/2);
-        vertLabel.setLayoutY(vertLabel.getHeight()/2);
-        return vertLabel;
-    }
+    // =================================== PRIMARY ALGORITHMS =======================================
 
     /**
      * Depth first search algorithm, travel form any vertex to all vertexes
@@ -114,6 +90,22 @@ public abstract class Graph {
         return  result;
     }
 
+
+    // =================================== SUB METHODS ===========================================
+
+    /**
+     * Generate random color and make it unique
+     */
+    private void generateRandomUniqueColor(Set<Color> colors) {
+        double red = Math.random();
+        double green = Math.random();
+        double blue = Math.random();
+
+        Color randomColor = new Color(red, green, blue, 1.0);
+
+        colors.add(randomColor);
+    }
+
     /**
      * Get vertex neighbors if it unvisited
      * @param vertex current vertex
@@ -131,4 +123,52 @@ public abstract class Graph {
         }
         return neighbors;
     }
+
+    // ============================== EVENT HANDLER METHODS ======================================
+
+    /**
+     * Add vertex to vertexes list and create vertex label
+     * @return vertex label
+     */
+    public Label addVert(MouseEvent mouseEvent) {
+        Label vertLabel = createVertLabel(mouseEvent);
+
+        /*
+        Create a vertex and set its property
+         */
+        Vertex vertex = new Vertex();
+        vertex.setVertLabel(vertLabel);
+        vertex.setVisted(false);
+
+        // Add vertex to vertexes list in graph
+        vertexes.add(vertex);
+
+        return vertLabel;
+    }
+
+    /**
+     * Create vertex label
+     * @return vertex label
+     */
+    public Label createVertLabel(MouseEvent mouseEvent) {
+        Label vertLabel = new Label(vertName.getFirst());
+        vertLabel.setFont(new Font("System Bold", 24));
+        vertLabel.setId("vertLabel");
+        vertLabel.setLayoutX(mouseEvent.getX() - (vertLabel.getWidth() / 2));
+        vertLabel.setLayoutY(mouseEvent.getY() - (vertLabel.getHeight() / 2));
+        return vertLabel;
+    }
+
+    // ============================== ABSTRACT METHODS ======================================
+
+    /**
+     * Find edge by a vertex
+     */
+    public abstract Edge getEdgeByVert(Vertex vertex);
+
+    /**
+     * Find edge by begin vertex and end vertex
+     * @return an edge connecting 2 vertex passed into
+     */
+    public abstract Edge getEdgeByVert(Vertex beginVert, Vertex endVert);
 }
