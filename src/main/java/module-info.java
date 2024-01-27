@@ -7,4 +7,6 @@ module org.example.graphsketcher {
 
     opens org.example.graphsketcher to javafx.fxml;
     exports org.example.graphsketcher;
+    exports org.example.graphsketcher.graph;
+    exports org.example.graphsketcher.controller;
 }

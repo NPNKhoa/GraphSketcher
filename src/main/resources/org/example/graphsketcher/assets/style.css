@@ -1,0 +1,33 @@
+#mainPane {
+    -fx-background-color: #DDDDDD;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+#notiField {
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.vbox {
+    -fx-background-color: #DDDDDD;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.button {
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+#instructionTitle {
+
+}
+
+#backButton {
+   -fx-background-color: #FFFFFF;
+}
+
+#backButton:hover {
+    -fx-opacity: 0.5;
+}
