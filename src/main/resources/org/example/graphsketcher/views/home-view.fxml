@@ -41,7 +41,7 @@
                   <Insets bottom="20.0" left="15.0" right="5.0" top="30.0" />
                </GridPane.margin>
                <children>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="addVertBtn" mnemonicParsing="false" onAction="#addVertBtnOnClick">
                      <graphic>
                         <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -58,7 +58,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="addEdgeBtn" mnemonicParsing="false" onAction="#addEdgeBtnOnClick">
                      <graphic>
                         <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -72,7 +72,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="moveBtn" mnemonicParsing="false" onAction="#moveBtnOnClick">
                      <graphic>
                         <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -86,7 +86,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#deleteBtnOnClick">
                      <graphic>
                         <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -100,7 +100,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="resetBtn" mnemonicParsing="false" onAction="#resetBtnOnClick">
                      <graphic>
                         <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -122,7 +122,7 @@
                   <Insets bottom="20.0" left="15.0" right="5.0" top="20.0" />
                </GridPane.margin>
                <children>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="travelBtn" mnemonicParsing="false" onAction="#travelBtnOnClick">
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
@@ -136,7 +136,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="pathBtn" mnemonicParsing="false" onAction="#pathBtnOnClick">
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
@@ -150,7 +150,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="cycleBtn" mnemonicParsing="false" onAction="#cycleBtnOnClick">
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
@@ -164,7 +164,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="treeBtn" mnemonicParsing="false" onAction="#treeBtnOnClick">
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
@@ -177,7 +177,7 @@
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor></Button>
-                  <Button mnemonicParsing="false">
+                  <Button fx:id="connectBtn" mnemonicParsing="false" onAction="#connectBtnOnClick">
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>

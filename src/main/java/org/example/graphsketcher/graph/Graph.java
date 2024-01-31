@@ -14,7 +14,7 @@ public abstract class Graph {
     protected  List<String> vertName;
     protected Set<Color> colors;
 
-    // Default constuctor
+    // Default constructor
     public Graph() {
         this.vertexes = new ArrayList<>();
         this.edges = new ArrayList<>();
@@ -22,7 +22,7 @@ public abstract class Graph {
         this.colors = new HashSet<>();
 
         for (int i = 100; i >= 1; i --) {
-            vertName.add(i - 1, String.valueOf(i));
+            vertName.add(String.valueOf(i));
         }
 
         generateRandomUniqueColor(colors);
@@ -31,7 +31,7 @@ public abstract class Graph {
     /**
      * Reset graph to initial state
      */
-    protected void resetGraph() {
+     public void resetGraph() {
         vertexes.clear();
         edges.clear();
         vertName.clear();

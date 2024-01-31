@@ -1,6 +1,9 @@
 package org.example.graphsketcher.graph;
 
-public abstract class UndirectedGraph extends Graph {
+import java.util.ArrayList;
+import java.util.HashSet;
+
+public class UndirectedGraph extends Graph {
     @Override
     public Edge getEdgeByVert(Vertex vertex) {
         for (Edge edge : getEdges()) {
