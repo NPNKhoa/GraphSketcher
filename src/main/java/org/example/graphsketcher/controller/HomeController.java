@@ -6,8 +6,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -15,6 +18,7 @@ import javafx.stage.Stage;
 import org.example.graphsketcher.Main;
 import org.example.graphsketcher.graph.Graph;
 import org.example.graphsketcher.graph.UndirectedGraph;
+import org.example.graphsketcher.graph.Vertex;
 
 import java.io.IOException;
 import java.net.URL;
@@ -24,6 +28,8 @@ import java.util.ResourceBundle;
 public class HomeController implements Initializable {
     @FXML
     public Pane mainPane;
+    @FXML
+    public Canvas canvas;
     @FXML
     public TextField notiField;
     @FXML
@@ -76,6 +82,7 @@ public class HomeController implements Initializable {
 
     // ================================ HANDLE EVENT =======================================
 
+    // *********************************** BUTTON ******************************************
     /**
      * Handle the click event on add vertex button
      */
@@ -132,7 +139,7 @@ public class HomeController implements Initializable {
      * Handle the click event on reset button
      */
     public void resetBtnOnClick() {
-//        graph.resetGraph();
+        graph.resetGraph();
     }
 
     /**
@@ -180,6 +187,47 @@ public class HomeController implements Initializable {
             throw new RuntimeException(e);
         }
     }
+
+    // ******************************* GRAPH'S ELEMENT *************************************
+
+    public void vertOnClick(MouseEvent mouseEvent) {
+        if (isEnableDelete) {
+            Label clickedVert = (Label) mouseEvent.getSource();
+            graph.deleteVert(clickedVert);
+            mainPane.getChildren().remove(clickedVert);
+        }
+    }
+
+    public void edgeOnClick(MouseEvent mouseEvent) {
+
+    }
+
+    public void weightOnClick(MouseEvent mouseEvent) {
+
+    }
+
+    public void vertOnPress(MouseEvent mouseEvent) {
+
+    }
+
+    public void vertOnDrag(MouseEvent mouseEvent) {
+
+    }
+
+    public void vertOnRelease(MouseEvent mouseEvent) {
+
+    }
+
+    // *********************************** OTHERS ******************************************
+
+    public void canvasOnClick(MouseEvent mouseEvent) {
+        if (isEnableAddVert) {
+            Label vertLabel = graph.addVert(mouseEvent);
+            mainPane.getChildren().add(vertLabel);
+            addEventToVert(vertLabel);
+        }
+    }
+
 
     // ================================ LOGICAL CODE ========================================
 
@@ -273,5 +321,9 @@ public class HomeController implements Initializable {
         isEnableAddEdge = false;
         isEnableMove = false;
         isEnableDelete = false;
+    }
+
+    private void addEventToVert(Label vertLabel) {
+        vertLabel.setOnMouseClicked(this::vertOnClick);
     }
 }

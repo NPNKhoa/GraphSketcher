@@ -38,7 +38,7 @@ public abstract class Graph {
         colors.clear();
 
         for (int i = 100; i >= 1; i --) {
-            vertName.add(i - 1, String.valueOf(i));
+            vertName.add(String.valueOf(i));
         }
 
         generateRandomUniqueColor(colors);
@@ -60,8 +60,11 @@ public abstract class Graph {
         return this.edges;
     }
 
+    public List<String> getVertName() {
+        return vertName;
+    }
 
-    // =================================== PRIMARY ALGORITHMS =======================================
+    // =================================== ALGORITHMS =======================================
 
     /**
      * Depth first search algorithm, travel form any vertex to all vertexes
@@ -78,7 +81,7 @@ public abstract class Graph {
         while (!vertexStack.isEmpty()) {
             Vertex currentVert = vertexStack.pop();
 
-            if (currentVert.isVisted()) {
+            if (currentVert.isVisited()) {
                 result.add(currentVert);
 
                 List<Vertex> neighbors = getUnvisitedNeighbors(currentVert);
@@ -90,8 +93,7 @@ public abstract class Graph {
         return  result;
     }
 
-
-    // =================================== SUB METHODS ===========================================
+    // =================================== SUB-METHODS ===========================================
 
     /**
      * Generate random color and make it unique
@@ -114,10 +116,10 @@ public abstract class Graph {
     private List<Vertex> getUnvisitedNeighbors(Vertex vertex) {
         List<Vertex> neighbors = new ArrayList<>();
         for (Edge edge : edges) {
-            if (edge.getBeginVert().equals(vertex) && !edge.getBeginVert().isVisted()) {
+            if (edge.getBeginVert().equals(vertex) && !edge.getBeginVert().isVisited()) {
                 neighbors.add(edge.getBeginVert());
             }
-            else if (edge.getEndVert().equals(vertex) && !edge.getEndVert().isVisted()) {
+            else if (edge.getEndVert().equals(vertex) && !edge.getEndVert().isVisited()) {
                 neighbors.add(edge.getEndVert());
             }
         }
@@ -131,19 +133,45 @@ public abstract class Graph {
      * @return vertex label
      */
     public Label addVert(MouseEvent mouseEvent) {
+        /*
+        Create vertex label and set its properties
+         */
         Label vertLabel = createVertLabel(mouseEvent);
+        vertLabel.setLayoutX(mouseEvent.getX());
+        vertLabel.setLayoutY(mouseEvent.getY());
+        vertLabel.setText(getVertName().getLast());
+        getVertName().removeLast();
+        vertLabel.getStyleClass().add("vertLabel");
 
         /*
-        Create a vertex and set its property
+        Create a vertex and set its properties
          */
         Vertex vertex = new Vertex();
         vertex.setVertLabel(vertLabel);
-        vertex.setVisted(false);
+        vertex.setVisited(false);
 
         // Add vertex to vertexes list in graph
         vertexes.add(vertex);
 
         return vertLabel;
+    }
+
+    /**
+     * Remove vertex by vertex label
+     */
+    public void deleteVert(Label vertLabel) {
+        Vertex vertex = findVertByLabel(vertLabel);
+        vertName.add(vertex.getName());
+        for (String v : vertName) {
+            System.out.print(v + " ");
+        }
+        System.out.println();
+        vertName.sort((s1, s2) -> Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1)));
+        for (String v : vertName) {
+            System.out.print(v + " ");
+        }
+        System.out.println();
+        vertexes.remove(vertex);
     }
 
     /**
@@ -157,6 +185,21 @@ public abstract class Graph {
         vertLabel.setLayoutX(mouseEvent.getX() - (vertLabel.getWidth() / 2));
         vertLabel.setLayoutY(mouseEvent.getY() - (vertLabel.getHeight() / 2));
         return vertLabel;
+    }
+
+    /**
+     * Find vertex by vertex label
+     * @param vertLabel vertex label
+     * @return vertex where vertex label equal to vertLabel parameter
+     */
+    public Vertex findVertByLabel(Label vertLabel) {
+        Vertex result = new Vertex();
+        for (Vertex v : vertexes) {
+            if (v.getVertLabel() == vertLabel) {
+                result = v;
+            }
+        }
+        return result;
     }
 
     // ============================== ABSTRACT METHODS ======================================

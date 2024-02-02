@@ -4,6 +4,10 @@
     -fx-background-radius: 10;
 }
 
+#canvas {
+    -fx-focus-traversable: false;
+}
+
 #notiField {
     -fx-border-radius: 5;
     -fx-background-radius: 5;
@@ -32,4 +36,18 @@
 
 #backButton:hover {
     -fx-opacity: 0.5;
+}
+
+.vertLabel {
+    -fx-font-size: 20;
+    -fx-label-padding: 15;
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-min-height: 60;
+    -fx-min-width: 60;
+    -fx-max-height: 60;
+    -fx-max-width: 60;
+    -fx-alignment: CENTER;
 }

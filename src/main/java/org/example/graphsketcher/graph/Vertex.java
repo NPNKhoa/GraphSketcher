@@ -4,18 +4,18 @@ import javafx.scene.control.Label;
 
 public class Vertex {
     private Label vertLabel;
-    private boolean isVisted;
+    private boolean isVisited;
 
     // Default Constructor
     public Vertex() {
         this.vertLabel = new Label();
-        this.isVisted = false;
+        this.isVisited = false;
     }
 
     // Copy Constructor
     public Vertex(Vertex vertex) {
         this.vertLabel = vertex.vertLabel;
-        this.isVisted = vertex.isVisted;
+        this.isVisited = vertex.isVisited;
     }
 
     /**
@@ -30,8 +30,8 @@ public class Vertex {
      * Check if a vertex is visited or not
      * @return true if visited vertex
      */
-    public boolean isVisted() {
-        return isVisted;
+    public boolean isVisited() {
+        return isVisited;
     }
 
     /**
@@ -44,10 +44,10 @@ public class Vertex {
 
     /**
      * setter: set visited vertex
-     * @param visted is visited or not
+     * @param visited is visited or not
      */
-    public void setVisted(boolean visted) {
-        isVisted = visted;
+    public void setVisited(boolean visited) {
+        isVisited = visited;
     }
 
     /**
@@ -55,6 +55,6 @@ public class Vertex {
      * @return vertex name
      */
     public String getName() {
-        return vertLabel.getText().trim();
+        return vertLabel.getText();
     }
 }

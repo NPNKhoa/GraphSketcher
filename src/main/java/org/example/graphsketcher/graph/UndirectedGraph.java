@@ -1,8 +1,5 @@
 package org.example.graphsketcher.graph;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 public class UndirectedGraph extends Graph {
     @Override
     public Edge getEdgeByVert(Vertex vertex) {
