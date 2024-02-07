@@ -3,6 +3,7 @@ package org.example.graphsketcher.graph;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import java.util.*;
 
@@ -48,7 +49,7 @@ public abstract class Graph {
      * Get vertexes list
      * @return Vertexes list
      */
-    List<Vertex> getVertexes() {
+    public List<Vertex> getVertexes() {
         return this.vertexes;
     }
 
@@ -56,7 +57,7 @@ public abstract class Graph {
      * Get edges list
      * @return edges list
      */
-    List<Edge> getEdges() {
+    public List<Edge> getEdges() {
         return this.edges;
     }
 
@@ -158,20 +159,26 @@ public abstract class Graph {
 
     /**
      * Remove vertex by vertex label
+     * @param vertLabel vertex label
      */
     public void deleteVert(Label vertLabel) {
         Vertex vertex = findVertByLabel(vertLabel);
         vertName.add(vertex.getName());
-        for (String v : vertName) {
-            System.out.print(v + " ");
-        }
-        System.out.println();
+        // Lambda expression to sort vertName list
         vertName.sort((s1, s2) -> Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1)));
-        for (String v : vertName) {
-            System.out.print(v + " ");
-        }
-        System.out.println();
         vertexes.remove(vertex);
+    }
+
+    public Edge addEdge(Vertex beginVert, Vertex endVert, int iWeight) {
+        Edge edge = new Edge();
+        edge.setBeginVert(beginVert);
+        edge.setEndVert(endVert);
+        edge.setWeight(iWeight);
+
+        Line edgeLine = new Line();
+
+
+        return edge;
     }
 
     /**

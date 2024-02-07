@@ -4,18 +4,20 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
+import org.controlsfx.control.ListSelectionView;
 import org.example.graphsketcher.Main;
+import org.example.graphsketcher.graph.Edge;
 import org.example.graphsketcher.graph.Graph;
 import org.example.graphsketcher.graph.UndirectedGraph;
 import org.example.graphsketcher.graph.Vertex;
@@ -62,7 +64,9 @@ public class HomeController implements Initializable {
     private boolean isEnableAddEdge;
     private boolean isEnableMove;
     private boolean isEnableDelete;
-    Graph graph;
+    private Label selectedVertLabel = null;
+    private Line temporaryLine = null;
+    private Graph graph;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -80,7 +84,7 @@ public class HomeController implements Initializable {
         resetDefaultBtnFocus();
     }
 
-    // ================================ HANDLE EVENT =======================================
+    // ================================ HANDLE EVENTS ======================================
 
     // *********************************** BUTTON ******************************************
     /**
@@ -207,15 +211,33 @@ public class HomeController implements Initializable {
     }
 
     public void vertOnPress(MouseEvent mouseEvent) {
+        if (isEnableAddEdge) {
+            startDrawEdge(mouseEvent);
+        }
 
+        if (isEnableMove) {
+
+        }
     }
 
     public void vertOnDrag(MouseEvent mouseEvent) {
+        if (isEnableAddEdge) {
+            drawEdge(mouseEvent);
+        }
 
+        if (isEnableMove) {
+
+        }
     }
 
     public void vertOnRelease(MouseEvent mouseEvent) {
+        if (isEnableAddEdge) {
+            endDrawEdge(mouseEvent);
+        }
 
+        if (isEnableMove) {
+
+        }
     }
 
     // *********************************** OTHERS ******************************************
@@ -230,6 +252,84 @@ public class HomeController implements Initializable {
 
 
     // ================================ LOGICAL CODE ========================================
+
+    /**
+     * Start drawing a line that represent for an edge
+     */
+    private void startDrawEdge(MouseEvent mouseEvent) {
+        selectedVertLabel = (Label) mouseEvent.getSource();
+
+        double startLineX = selectedVertLabel.getLayoutX() + selectedVertLabel.getWidth() / 2;
+        double startLineY = selectedVertLabel.getLayoutY() + selectedVertLabel.getHeight() / 2;
+
+        temporaryLine = new Line(startLineX, startLineY, startLineX, startLineY);
+
+        mainPane.getChildren().add(temporaryLine);
+    }
+
+    private void drawEdge(MouseEvent mouseEvent) {
+        temporaryLine.setStartX(selectedVertLabel.getLayoutX() + selectedVertLabel.getWidth() / 2);
+        temporaryLine.setStartY(selectedVertLabel.getLayoutY() + selectedVertLabel.getHeight() / 2);
+        temporaryLine.setEndX(selectedVertLabel.getLayoutX() + mouseEvent.getX());
+        temporaryLine.setEndY(selectedVertLabel.getLayoutY() + mouseEvent.getY());
+    }
+
+    private void endDrawEdge(MouseEvent mouseEvent) {
+        Label releaseVertexLabel = getReleaseVertexLabel(mouseEvent);
+
+        if (releaseVertexLabel != null && releaseVertexLabel != selectedVertLabel) {
+            Vertex beginVert = graph.findVertByLabel(selectedVertLabel);
+            Vertex endVert = graph.findVertByLabel(releaseVertexLabel);
+
+//            Edge edge = graph.getEdgeByVert(beginVert, endVert);
+//            //TODO: Show dialog
+//            showInputWeightDialog(edge);
+
+            // test
+
+            temporaryLine.setEndX(releaseVertexLabel.getLayoutX() + selectedVertLabel.getWidth() / 2);
+            temporaryLine.setEndY(releaseVertexLabel.getLayoutY() + selectedVertLabel.getHeight() / 2);
+        }
+
+//        selectedVertLabel = null;
+//        mainPane.getChildren().remove(temporaryLine);
+//        temporaryLine = null;
+    }
+
+    /**
+     * Show dialog allow user to input weight and draw edge
+     */
+    private void showInputWeightDialog(Edge edge) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nhập trọng số cung!");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Xin mời nhập trọng số cung: ");
+
+        dialog.showAndWait().ifPresent(value -> {
+            try {
+                int intValue = Integer.parseInt(value);
+                if (intValue > 0) {
+
+                }
+                else {
+                    showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên hợp lệ!");
+                }
+            }
+            catch (NumberFormatException e) {
+                showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên hợp lệ!");
+            }
+        });
+    }
+
+    /**
+     * Add edges to the graph and display it on the UI
+     * @param beginVert begin vertex
+     * @param endVert end vertex
+     * @param iWeight weight
+     */
+    private void addEdge(Vertex beginVert, Vertex endVert, int iWeight) {
+
+    }
 
     /**
      * Switching to Help scene
@@ -325,5 +425,39 @@ public class HomeController implements Initializable {
 
     private void addEventToVert(Label vertLabel) {
         vertLabel.setOnMouseClicked(this::vertOnClick);
+        vertLabel.setOnMousePressed(this::vertOnPress);
+        vertLabel.setOnMouseDragged(this::vertOnDrag);
+        vertLabel.setOnMouseReleased(this::vertOnRelease);
+    }
+
+    private Label getReleaseVertexLabel(MouseEvent mouseEvent) {
+        Label vertLabel;
+        Bounds bounds;
+        for (Vertex vertex : graph.getVertexes()) {
+            vertLabel = vertex.getVertLabel();
+            bounds = vertLabel.getBoundsInParent();
+
+            if (bounds.contains(selectedVertLabel.getLayoutX() + mouseEvent.getX(),
+                    selectedVertLabel.getLayoutY() + mouseEvent.getY())) {
+                return vertLabel;
+            }
+        }
+        return null;
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    /**
+     * Calculate the coordinates of the starting and ending points of the edge connecting 2 vertices
+     * so that the distance is minimum
+     */
+    private void calculateCoordinates(double x1, double y1, double x2, double y2) {
+
     }
 }
