@@ -169,18 +169,6 @@ public abstract class Graph {
         vertexes.remove(vertex);
     }
 
-    public Edge addEdge(Vertex beginVert, Vertex endVert, int iWeight) {
-        Edge edge = new Edge();
-        edge.setBeginVert(beginVert);
-        edge.setEndVert(endVert);
-        edge.setWeight(iWeight);
-
-        Line edgeLine = new Line();
-
-
-        return edge;
-    }
-
     /**
      * Create vertex label
      * @return vertex label

@@ -281,7 +281,7 @@ public class HomeController implements Initializable {
             Vertex beginVert = graph.findVertByLabel(selectedVertLabel);
             Vertex endVert = graph.findVertByLabel(releaseVertexLabel);
 
-//            Edge edge = graph.getEdgeByVert(beginVert, endVert);
+            Edge edge = addEdge(selectedVertLabel, releaseVertexLabel, 1);
 //            //TODO: Show dialog
 //            showInputWeightDialog(edge);
 
@@ -291,13 +291,13 @@ public class HomeController implements Initializable {
             temporaryLine.setEndY(releaseVertexLabel.getLayoutY() + selectedVertLabel.getHeight() / 2);
         }
 
-//        selectedVertLabel = null;
-//        mainPane.getChildren().remove(temporaryLine);
-//        temporaryLine = null;
+        selectedVertLabel = null;
+        mainPane.getChildren().remove(temporaryLine);
+        temporaryLine = null;
     }
 
     /**
-     * Show dialog allow user to input weight and draw edge
+     * Show dialog allowing user to input weight and draw edge
      */
     private void showInputWeightDialog(Edge edge) {
         TextInputDialog dialog = new TextInputDialog();
@@ -312,7 +312,7 @@ public class HomeController implements Initializable {
 
                 }
                 else {
-                    showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên hợp lệ!");
+                    showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên lớn hơn 0!");
                 }
             }
             catch (NumberFormatException e) {
@@ -323,12 +323,33 @@ public class HomeController implements Initializable {
 
     /**
      * Add edges to the graph and display it on the UI
-     * @param beginVert begin vertex
-     * @param endVert end vertex
+     * @param beginVertLabel begin vertex label
+     * @param endVertLabel end vertex label
      * @param iWeight weight
      */
-    private void addEdge(Vertex beginVert, Vertex endVert, int iWeight) {
+    private Edge addEdge(Label beginVertLabel, Label endVertLabel, int iWeight) {
+        Edge edge = new Edge();
 
+        Line edgeLine = new Line();
+        double angle = Math.atan2(endVertLabel.getLayoutY() - beginVertLabel.getLayoutY(),
+                endVertLabel.getLayoutX() - beginVertLabel.getLayoutX());
+        System.out.println("angle: " + angle);
+        System.out.println("sin: " + Math.sin(angle));
+        System.out.println("cos: " + Math.cos(angle));
+        System.out.println("sin pi/2: " + Math.sin(3.14/2));
+
+        double startVertY = (beginVertLabel.getLayoutY() + 30) + (30 * Math.sin(angle));
+        double startVertX = (beginVertLabel.getLayoutX() + 30) + (30 * Math.cos(angle));
+        double endVertY = (endVertLabel.getLayoutY() + 30) - (30 * Math.sin(angle));
+        double endVertX = (endVertLabel.getLayoutX() + 30) - (30 * Math.cos(angle));
+
+        edgeLine.setStartY(startVertY);
+        edgeLine.setStartX(startVertX);
+        edgeLine.setEndY(endVertY);
+        edgeLine.setEndX(endVertX);
+        mainPane.getChildren().add(edgeLine);
+
+        return edge;
     }
 
     /**
