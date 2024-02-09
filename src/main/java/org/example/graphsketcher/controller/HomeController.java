@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import org.controlsfx.control.ListSelectionView;
 import org.example.graphsketcher.Main;
 import org.example.graphsketcher.graph.Edge;
@@ -24,6 +25,7 @@ import org.example.graphsketcher.graph.Vertex;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -67,6 +69,7 @@ public class HomeController implements Initializable {
     private Label selectedVertLabel = null;
     private Line temporaryLine = null;
     private Graph graph;
+    private final int RADIUS = 30;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -323,33 +326,43 @@ public class HomeController implements Initializable {
 
     /**
      * Add edges to the graph and display it on the UI
-     * @param beginVertLabel begin vertex label
+     * @param startVertLabel begin vertex label
      * @param endVertLabel end vertex label
      * @param iWeight weight
      */
-    private Edge addEdge(Label beginVertLabel, Label endVertLabel, int iWeight) {
+    private Edge addEdge(Label startVertLabel, Label endVertLabel, int iWeight) {
         Edge edge = new Edge();
-
         Line edgeLine = new Line();
-        double angle = Math.atan2(endVertLabel.getLayoutY() - beginVertLabel.getLayoutY(),
-                endVertLabel.getLayoutX() - beginVertLabel.getLayoutX());
-        System.out.println("angle: " + angle);
-        System.out.println("sin: " + Math.sin(angle));
-        System.out.println("cos: " + Math.cos(angle));
-        System.out.println("sin pi/2: " + Math.sin(3.14/2));
+        double[] coordinates = calculateCoordinates(startVertLabel, endVertLabel);
 
-        double startVertY = (beginVertLabel.getLayoutY() + 30) + (30 * Math.sin(angle));
-        double startVertX = (beginVertLabel.getLayoutX() + 30) + (30 * Math.cos(angle));
-        double endVertY = (endVertLabel.getLayoutY() + 30) - (30 * Math.sin(angle));
-        double endVertX = (endVertLabel.getLayoutX() + 30) - (30 * Math.cos(angle));
-
-        edgeLine.setStartY(startVertY);
-        edgeLine.setStartX(startVertX);
-        edgeLine.setEndY(endVertY);
-        edgeLine.setEndX(endVertX);
+        edgeLine.setStartX(coordinates[0]);
+        edgeLine.setStartY(coordinates[1]);
+        edgeLine.setEndX(coordinates[2]);
+        edgeLine.setEndY(coordinates[3]);
         mainPane.getChildren().add(edgeLine);
 
         return edge;
+    }
+
+
+    /**
+     * Calculate the coordinates so that the distance of the line connecting two vertices is shortest
+     * @return an array with 4 coordinates in order startX, startY, endX, endY
+     */
+    private double[] calculateCoordinates(Label startVert, Label endVert) {
+
+        // coordinates variable is considered as coordinates of a line in order startX, startY, endX, endY
+        double[] coordinates = new double[4];
+
+        double angle = Math.atan2(endVert.getLayoutY() - startVert.getLayoutY(),
+                endVert.getLayoutX() - startVert.getLayoutX());
+        
+        coordinates[0] = (startVert.getLayoutX() + RADIUS) + (RADIUS * Math.cos(angle)); // startX
+        coordinates[1] = (startVert.getLayoutY() + RADIUS) + (RADIUS * Math.sin(angle)); //startY
+        coordinates[2] = (endVert.getLayoutX() + RADIUS) - (RADIUS * Math.cos(angle)); // endX
+        coordinates[3] = (endVert.getLayoutY() + RADIUS) - (RADIUS * Math.sin(angle)); // endY
+
+        return coordinates;
     }
 
     /**
@@ -472,13 +485,5 @@ public class HomeController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
-    }
-
-    /**
-     * Calculate the coordinates of the starting and ending points of the edge connecting 2 vertices
-     * so that the distance is minimum
-     */
-    private void calculateCoordinates(double x1, double y1, double x2, double y2) {
-
     }
 }

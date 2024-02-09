@@ -8,7 +8,7 @@ public class Edge {
     private Vertex endVert;
     private int weight;
     private Label weightLabel;
-    private Line edgeLine;
+    private Line lineEdge;
 
     /**
      * Default constructor
@@ -17,7 +17,7 @@ public class Edge {
         this.beginVert = new Vertex();
         this.endVert = new Vertex();
         this.weightLabel = new Label();
-        this.edgeLine = new Line();
+        this.lineEdge = new Line();
     }
 
     /**
@@ -63,11 +63,11 @@ public class Edge {
         this.weightLabel = weightLabel;
     }
 
-    public Line getEdgeLine() {
-        return edgeLine;
+    public Line getLineEdge() {
+        return lineEdge;
     }
 
-    public void setEdgeLine(Line edgeLine) {
-        this.edgeLine = edgeLine;
+    public void setLineEdge(Line lineEdge) {
+        this.lineEdge = lineEdge;
     }
 }
