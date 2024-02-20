@@ -25,9 +25,7 @@ import org.example.graphsketcher.graph.Vertex;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class HomeController implements Initializable {
     @FXML
@@ -147,6 +145,8 @@ public class HomeController implements Initializable {
      */
     public void resetBtnOnClick() {
         graph.resetGraph();
+        mainPane.getChildren().clear();
+        mainPane.getChildren().add(canvas);
     }
 
     /**
@@ -199,9 +199,22 @@ public class HomeController implements Initializable {
 
     public void vertOnClick(MouseEvent mouseEvent) {
         if (isEnableDelete) {
-            Label clickedVert = (Label) mouseEvent.getSource();
-            graph.deleteVert(clickedVert);
-            mainPane.getChildren().remove(clickedVert);
+            Label clickedVertLabel = (Label) mouseEvent.getSource();
+            Vertex clickedVertex = graph.findVertByLabel(clickedVertLabel);
+            List<Edge> edgeList = graph.getAllEdgesByVert(clickedVertex);
+            List<Line> edgeLineList = new ArrayList<>();
+            List<Label> edgeWeightLabelList = new ArrayList<>();
+            for (Edge edge : edgeList) {
+                edgeLineList.add(edge.getLineEdge());
+                edgeWeightLabelList.add(edge.getWeightLabel());
+            }
+
+            graph.getEdges().removeAll(edgeList);
+            graph.deleteVert(clickedVertLabel);
+
+            mainPane.getChildren().remove(clickedVertLabel);
+            mainPane.getChildren().removeAll(edgeLineList);
+            mainPane.getChildren().removeAll(edgeWeightLabelList);
         }
     }
 
@@ -219,7 +232,7 @@ public class HomeController implements Initializable {
         }
 
         if (isEnableMove) {
-
+            startMoveVert(mouseEvent);
         }
     }
 
@@ -229,7 +242,7 @@ public class HomeController implements Initializable {
         }
 
         if (isEnableMove) {
-
+            moveVert(mouseEvent);
         }
     }
 
@@ -239,7 +252,7 @@ public class HomeController implements Initializable {
         }
 
         if (isEnableMove) {
-
+            endMoveVert();
         }
     }
 
@@ -252,7 +265,6 @@ public class HomeController implements Initializable {
             addEventToVert(vertLabel);
         }
     }
-
 
     // ================================ LOGICAL CODE ========================================
 
@@ -284,14 +296,7 @@ public class HomeController implements Initializable {
             Vertex beginVert = graph.findVertByLabel(selectedVertLabel);
             Vertex endVert = graph.findVertByLabel(releaseVertexLabel);
 
-            Edge edge = addEdge(selectedVertLabel, releaseVertexLabel, 1);
-//            //TODO: Show dialog
-//            showInputWeightDialog(edge);
-
-            // test
-
-            temporaryLine.setEndX(releaseVertexLabel.getLayoutX() + selectedVertLabel.getWidth() / 2);
-            temporaryLine.setEndY(releaseVertexLabel.getLayoutY() + selectedVertLabel.getHeight() / 2);
+            showInputWeightDialog(beginVert, endVert);
         }
 
         selectedVertLabel = null;
@@ -299,20 +304,83 @@ public class HomeController implements Initializable {
         temporaryLine = null;
     }
 
+    private void startMoveVert(MouseEvent mouseEvent) {
+        selectedVertLabel = (Label) mouseEvent.getSource();
+    }
+
+    private void moveVert(MouseEvent mouseEvent) {
+        selectedVertLabel = (Label) mouseEvent.getSource();
+
+        selectedVertLabel.setLayoutX(mouseEvent.getX() + selectedVertLabel.getLayoutX() - RADIUS);
+        selectedVertLabel.setLayoutY(mouseEvent.getY() + selectedVertLabel.getLayoutY() - RADIUS);
+
+        Vertex selectedVertex = graph.findVertByLabel(selectedVertLabel);
+
+        List<Edge> edgeList = graph.getAllEdgesByVert(selectedVertex);
+
+        for (Edge edge : edgeList) {
+            Label startVertLabel = edge.getBeginVert().getVertLabel();
+            Label endVertLabel = edge.getEndVert().getVertLabel();
+
+            double[] edgeCoordinates = calculateCoordinates(startVertLabel, endVertLabel);
+            edge.getLineEdge().setStartX(edgeCoordinates[0]);
+            edge.getLineEdge().setStartY(edgeCoordinates[1]);
+            edge.getLineEdge().setEndX(edgeCoordinates[2]);
+            edge.getLineEdge().setEndY(edgeCoordinates[3]);
+
+            edge.getWeightLabel().setLayoutX((edgeCoordinates[0] + edgeCoordinates[2]) / 2);
+            edge.getWeightLabel().setLayoutY((edgeCoordinates[1] + edgeCoordinates[3]) / 2);
+        }
+    }
+
+    private void endMoveVert() {
+        selectedVertLabel = null;
+    }
+
     /**
-     * Show dialog allowing user to input weight and draw edge
+     * Show dialog allowing user to input weight and draw edge.
+     * After user entered the weight, create edge, edge weight and add them to main pane
+     * @param beginVert begin vertex
+     * @param endVert end vertex
      */
-    private void showInputWeightDialog(Edge edge) {
-        TextInputDialog dialog = new TextInputDialog();
+    private void showInputWeightDialog(Vertex beginVert, Vertex endVert) {
+        /*
+            Create a dialog and set its properties
+         */
+        TextInputDialog dialog = new TextInputDialog("1");
         dialog.setTitle("Nhập trọng số cung!");
         dialog.setHeaderText(null);
         dialog.setContentText("Xin mời nhập trọng số cung: ");
 
         dialog.showAndWait().ifPresent(value -> {
             try {
-                int intValue = Integer.parseInt(value);
+                int intValue = Integer.parseInt(value); // the entered value
                 if (intValue > 0) {
+                    /*
+                        Create an edge and set their properties
+                     */
+                    Edge edge = new Edge();
+                    edge.setLineEdge(addEdge(beginVert.getVertLabel(), endVert.getVertLabel()));
+                    edge.setBeginVert(beginVert);
+                    edge.setEndVert(endVert);
+                    edge.setWeight(intValue);
 
+                    graph.getEdges().add(edge);
+
+                    double[] edgeCoordinates = calculateCoordinates(beginVert.getVertLabel(), endVert.getVertLabel());
+
+                    /*
+                        Create a label representing for edge weight
+                     */
+                    Label weightLabel = new Label();
+                    weightLabel.getStyleClass().add("weightLabel");
+                    weightLabel.setText(Integer.toString(intValue));
+                    weightLabel.setLayoutX((edgeCoordinates[0] + edgeCoordinates[2]) / 2);
+                    weightLabel.setLayoutY((edgeCoordinates[1] + edgeCoordinates[3]) / 2);
+
+                    edge.setWeightLabel(weightLabel);
+
+                    mainPane.getChildren().add(weightLabel);
                 }
                 else {
                     showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên lớn hơn 0!");
@@ -328,39 +396,37 @@ public class HomeController implements Initializable {
      * Add edges to the graph and display it on the UI
      * @param startVertLabel begin vertex label
      * @param endVertLabel end vertex label
-     * @param iWeight weight
+     * @return an edge that have start, end vertex label and its weight
      */
-    private Edge addEdge(Label startVertLabel, Label endVertLabel, int iWeight) {
-        Edge edge = new Edge();
-        Line edgeLine = new Line();
+    private Line addEdge(Label startVertLabel, Label endVertLabel) {
         double[] coordinates = calculateCoordinates(startVertLabel, endVertLabel);
 
-        edgeLine.setStartX(coordinates[0]);
-        edgeLine.setStartY(coordinates[1]);
-        edgeLine.setEndX(coordinates[2]);
-        edgeLine.setEndY(coordinates[3]);
-        mainPane.getChildren().add(edgeLine);
+        Line lineEdge = new Line();
+        lineEdge.setStartX(coordinates[0]);
+        lineEdge.setStartY(coordinates[1]);
+        lineEdge.setEndX(coordinates[2]);
+        lineEdge.setEndY(coordinates[3]);
+        mainPane.getChildren().add(lineEdge);
 
-        return edge;
+        return lineEdge;
     }
-
 
     /**
      * Calculate the coordinates so that the distance of the line connecting two vertices is shortest
      * @return an array with 4 coordinates in order startX, startY, endX, endY
      */
-    private double[] calculateCoordinates(Label startVert, Label endVert) {
+    private double[] calculateCoordinates(Label startVertLabel, Label endVertLabel) {
 
         // coordinates variable is considered as coordinates of a line in order startX, startY, endX, endY
         double[] coordinates = new double[4];
 
-        double angle = Math.atan2(endVert.getLayoutY() - startVert.getLayoutY(),
-                endVert.getLayoutX() - startVert.getLayoutX());
+        double angle = Math.atan2(endVertLabel.getLayoutY() - startVertLabel.getLayoutY(),
+                endVertLabel.getLayoutX() - startVertLabel.getLayoutX());
         
-        coordinates[0] = (startVert.getLayoutX() + RADIUS) + (RADIUS * Math.cos(angle)); // startX
-        coordinates[1] = (startVert.getLayoutY() + RADIUS) + (RADIUS * Math.sin(angle)); //startY
-        coordinates[2] = (endVert.getLayoutX() + RADIUS) - (RADIUS * Math.cos(angle)); // endX
-        coordinates[3] = (endVert.getLayoutY() + RADIUS) - (RADIUS * Math.sin(angle)); // endY
+        coordinates[0] = (startVertLabel.getLayoutX() + RADIUS) + (RADIUS * Math.cos(angle)); // startX
+        coordinates[1] = (startVertLabel.getLayoutY() + RADIUS) + (RADIUS * Math.sin(angle)); //startY
+        coordinates[2] = (endVertLabel.getLayoutX() + RADIUS) - (RADIUS * Math.cos(angle)); // endX
+        coordinates[3] = (endVertLabel.getLayoutY() + RADIUS) - (RADIUS * Math.sin(angle)); // endY
 
         return coordinates;
     }

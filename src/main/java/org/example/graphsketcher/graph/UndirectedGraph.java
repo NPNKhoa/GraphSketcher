@@ -1,5 +1,8 @@
 package org.example.graphsketcher.graph;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UndirectedGraph extends Graph {
     @Override
     public Edge getEdgeByVert(Vertex vertex) {
@@ -9,6 +12,17 @@ public class UndirectedGraph extends Graph {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<Edge> getAllEdgesByVert(Vertex vertex) {
+        List<Edge> edgeList = new ArrayList<>();
+        for (Edge edge : edges) {
+            if (edge.getBeginVert() == vertex || edge.getEndVert() == vertex) {
+                edgeList.add(edge);
+            }
+        }
+        return edgeList;
     }
 
     @Override

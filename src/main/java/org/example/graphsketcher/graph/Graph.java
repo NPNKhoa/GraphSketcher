@@ -3,7 +3,6 @@ package org.example.graphsketcher.graph;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import java.util.*;
 
@@ -203,6 +202,8 @@ public abstract class Graph {
      * Find edge by a vertex
      */
     public abstract Edge getEdgeByVert(Vertex vertex);
+
+    public abstract List<Edge> getAllEdgesByVert(Vertex vertex);
 
     /**
      * Find edge by begin vertex and end vertex

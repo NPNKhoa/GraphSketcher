@@ -51,3 +51,7 @@
     -fx-max-width: 60;
     -fx-alignment: CENTER;
 }
+
+.weightLabel {
+    -fx-font-size: 15;
+}
