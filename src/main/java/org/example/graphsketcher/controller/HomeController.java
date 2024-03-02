@@ -9,14 +9,14 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.util.Pair;
-import org.controlsfx.control.ListSelectionView;
+import javafx.scene.paint.Color;
 import org.example.graphsketcher.Main;
 import org.example.graphsketcher.graph.Edge;
 import org.example.graphsketcher.graph.Graph;
@@ -153,7 +153,23 @@ public class HomeController implements Initializable {
      * Handle the click event on travel button
      */
     public void travelBtnOnClick() {
-
+        String beginVertString = showInputVertDialog();
+        Vertex beginVert = new Vertex();
+        for (Vertex vertex : graph.getVertexes()) {
+            if (Objects.equals(vertex.getName(), beginVertString)) {
+                beginVert = vertex;
+            }
+        }
+        List<Vertex> traveledVert = graph.depthFirstSearch(beginVert);
+        Color color = new Color(0.32, 1.0, 0.1, 1.0);
+        BackgroundFill backgroundFill = new BackgroundFill(color, new CornerRadii(10.0, true), null);
+        for (Vertex vert : traveledVert) {
+            vert.getVertLabel().setBackground(new Background(backgroundFill));
+        }
+        notiField.setText("Kết quả duyệt đồ thị: ");
+        for (Vertex vert : traveledVert) {
+            notiField.appendText(vert.getName() + ", ");
+        }
     }
 
     /**
@@ -210,20 +226,12 @@ public class HomeController implements Initializable {
             }
 
             graph.getEdges().removeAll(edgeList);
-            graph.deleteVert(clickedVertLabel);
+            deleteVert(clickedVertLabel);
 
             mainPane.getChildren().remove(clickedVertLabel);
             mainPane.getChildren().removeAll(edgeLineList);
             mainPane.getChildren().removeAll(edgeWeightLabelList);
         }
-    }
-
-    public void edgeOnClick(MouseEvent mouseEvent) {
-
-    }
-
-    public void weightOnClick(MouseEvent mouseEvent) {
-
     }
 
     public void vertOnPress(MouseEvent mouseEvent) {
@@ -260,7 +268,7 @@ public class HomeController implements Initializable {
 
     public void canvasOnClick(MouseEvent mouseEvent) {
         if (isEnableAddVert) {
-            Label vertLabel = graph.addVert(mouseEvent);
+            Label vertLabel = addVert(mouseEvent);
             mainPane.getChildren().add(vertLabel);
             addEventToVert(vertLabel);
         }
@@ -311,8 +319,13 @@ public class HomeController implements Initializable {
     private void moveVert(MouseEvent mouseEvent) {
         selectedVertLabel = (Label) mouseEvent.getSource();
 
-        selectedVertLabel.setLayoutX(mouseEvent.getX() + selectedVertLabel.getLayoutX() - RADIUS);
-        selectedVertLabel.setLayoutY(mouseEvent.getY() + selectedVertLabel.getLayoutY() - RADIUS);
+        double vertLayoutX = mouseEvent.getX() + selectedVertLabel.getLayoutX() - RADIUS;
+        double vertLayoutY = mouseEvent.getY() + selectedVertLabel.getLayoutY() - RADIUS;
+
+        double[] vertLayout = getVertCoordinates(vertLayoutX, vertLayoutY);
+
+        selectedVertLabel.setLayoutX(vertLayout[0]);
+        selectedVertLabel.setLayoutY(vertLayout[1]);
 
         Vertex selectedVertex = graph.findVertByLabel(selectedVertLabel);
 
@@ -322,7 +335,7 @@ public class HomeController implements Initializable {
             Label startVertLabel = edge.getBeginVert().getVertLabel();
             Label endVertLabel = edge.getEndVert().getVertLabel();
 
-            double[] edgeCoordinates = calculateCoordinates(startVertLabel, endVertLabel);
+            double[] edgeCoordinates = calculateCoordinates(startVertLabel, endVertLabel, RADIUS);
             edge.getLineEdge().setStartX(edgeCoordinates[0]);
             edge.getLineEdge().setStartY(edgeCoordinates[1]);
             edge.getLineEdge().setEndX(edgeCoordinates[2]);
@@ -367,7 +380,7 @@ public class HomeController implements Initializable {
 
                     graph.getEdges().add(edge);
 
-                    double[] edgeCoordinates = calculateCoordinates(beginVert.getVertLabel(), endVert.getVertLabel());
+                    double[] edgeCoordinates = calculateCoordinates(beginVert.getVertLabel(), endVert.getVertLabel(), RADIUS);
 
                     /*
                         Create a label representing for edge weight
@@ -381,6 +394,7 @@ public class HomeController implements Initializable {
                     edge.setWeightLabel(weightLabel);
 
                     mainPane.getChildren().add(weightLabel);
+                    addEventToWeight(weightLabel);
                 }
                 else {
                     showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên lớn hơn 0!");
@@ -392,6 +406,71 @@ public class HomeController implements Initializable {
         });
     }
 
+    private String showInputVertDialog() {
+        List<Vertex> vertexes = graph.getVertexes();
+        List<String> vertexString = new ArrayList<>();
+        for (Vertex v : vertexes) {
+            vertexString.add(v.getName());
+        }
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(vertexes.getFirst().getName(), vertexString);
+        dialog.setTitle("Chọn đỉnh bắt đầu");
+        dialog.setHeaderText(null);
+        return dialog.showAndWait().get();
+    }
+
+    /**
+     * Add vertex to vertexes list and create vertex label
+     * @return vertex label
+     */
+    public Label addVert(MouseEvent mouseEvent) {
+        Label vertLabel = createVertLabel(mouseEvent);
+
+        /*
+        Create a vertex and set its properties
+         */
+        Vertex vertex = new Vertex();
+        vertex.setVertLabel(vertLabel);
+        vertex.setVisited(false);
+
+        // Add vertex to vertexes list in graph
+        graph.getVertexes().add(vertex);
+
+        return vertLabel;
+    }
+
+    /**
+     * Create vertex label and set its properties
+     * @return vertex label
+     */
+    public Label createVertLabel(MouseEvent mouseEvent) {
+        double vertLayoutX = Math.min(mouseEvent.getX() - RADIUS, mainPane.getWidth() - RADIUS * 2);
+        double vertLayoutY = Math.min(mouseEvent.getY() - RADIUS, mainPane.getHeight() - RADIUS * 2);
+
+        double[] vertLayout = getVertCoordinates(vertLayoutX, vertLayoutY);
+
+        Label vertLabel = new Label(graph.getVertName().getFirst());
+        vertLabel.setId("vertLabel");
+        vertLabel.setLayoutX(vertLayout[0]);
+        vertLabel.setLayoutY(vertLayout[1]);
+        vertLabel.setText(graph.getVertName().getLast());
+        graph.getVertName().removeLast();
+        vertLabel.setFont(new Font("System Bold", 24));
+
+        return vertLabel;
+    }
+
+    /**
+     * Remove vertex by vertex label
+     * @param vertLabel vertex label
+     */
+    public void deleteVert(Label vertLabel) {
+        Vertex vertex = graph.findVertByLabel(vertLabel);
+        graph.getVertName().add(vertex.getName());
+        // Lambda expression to sort vertName list
+        graph.getVertName().sort((s1, s2) -> Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1)));
+        graph.getVertexes().remove(vertex);
+    }
+
     /**
      * Add edges to the graph and display it on the UI
      * @param startVertLabel begin vertex label
@@ -399,38 +478,47 @@ public class HomeController implements Initializable {
      * @return an edge that have start, end vertex label and its weight
      */
     private Line addEdge(Label startVertLabel, Label endVertLabel) {
-        double[] coordinates = calculateCoordinates(startVertLabel, endVertLabel);
+        double[] coordinates = calculateCoordinates(startVertLabel, endVertLabel, RADIUS);
 
         Line lineEdge = new Line();
         lineEdge.setStartX(coordinates[0]);
         lineEdge.setStartY(coordinates[1]);
         lineEdge.setEndX(coordinates[2]);
         lineEdge.setEndY(coordinates[3]);
+        lineEdge.setStyle("-fx-stroke-width: 2px;");
         mainPane.getChildren().add(lineEdge);
 
+        addEventToEdge(lineEdge);
+
         return lineEdge;
+    }
+
+    public void deleteEdge(Line edgeLine) {
+        Edge edge = graph.getEdgeByEdgeLine(edgeLine);
+        graph.getEdges().remove(edge);
+        mainPane.getChildren().remove(edgeLine);
+        mainPane.getChildren().remove(edge.getWeightLabel());
     }
 
     /**
      * Calculate the coordinates so that the distance of the line connecting two vertices is shortest
      * @return an array with 4 coordinates in order startX, startY, endX, endY
      */
-    private double[] calculateCoordinates(Label startVertLabel, Label endVertLabel) {
+    private double[] calculateCoordinates(Label startVertLabel, Label endVertLabel, int radius) {
 
         // coordinates variable is considered as coordinates of a line in order startX, startY, endX, endY
         double[] coordinates = new double[4];
 
         double angle = Math.atan2(endVertLabel.getLayoutY() - startVertLabel.getLayoutY(),
                 endVertLabel.getLayoutX() - startVertLabel.getLayoutX());
-        
-        coordinates[0] = (startVertLabel.getLayoutX() + RADIUS) + (RADIUS * Math.cos(angle)); // startX
-        coordinates[1] = (startVertLabel.getLayoutY() + RADIUS) + (RADIUS * Math.sin(angle)); //startY
-        coordinates[2] = (endVertLabel.getLayoutX() + RADIUS) - (RADIUS * Math.cos(angle)); // endX
-        coordinates[3] = (endVertLabel.getLayoutY() + RADIUS) - (RADIUS * Math.sin(angle)); // endY
+
+        coordinates[0] = (startVertLabel.getLayoutX() + radius) + (radius * Math.cos(angle)); // startX
+        coordinates[1] = (startVertLabel.getLayoutY() + radius) + (radius * Math.sin(angle)); //startY
+        coordinates[2] = (endVertLabel.getLayoutX() + radius) - (radius * Math.cos(angle)); // endX
+        coordinates[3] = (endVertLabel.getLayoutY() + radius) - (radius * Math.sin(angle)); // endY
 
         return coordinates;
     }
-
     /**
      * Switching to Help scene
      */
@@ -440,6 +528,12 @@ public class HomeController implements Initializable {
         Scene scene = new Scene(layout);
         stage.sizeToScene();
         stage.setScene(scene);
+    }
+
+    private void changeWeight(Label weight) {
+        Edge edge = graph.getEdgeByWeightLabel(weight);
+        mainPane.getChildren().remove(edge.getWeightLabel());
+        showInputWeightDialog(edge.getBeginVert(), edge.getEndVert());
     }
 
     // ================================ SUB-HANDLER ==========================================
@@ -530,6 +624,22 @@ public class HomeController implements Initializable {
         vertLabel.setOnMouseReleased(this::vertOnRelease);
     }
 
+    private void addEventToEdge(Line edgeLine) {
+        edgeLine.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1 && isEnableDelete) {
+                deleteEdge(edgeLine);
+            }
+        });
+    }
+
+    private void addEventToWeight(Label weight) {
+        weight.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                changeWeight(weight);
+            }
+        });
+    }
+
     private Label getReleaseVertexLabel(MouseEvent mouseEvent) {
         Label vertLabel;
         Bounds bounds;
@@ -551,5 +661,22 @@ public class HomeController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    private double[] getVertCoordinates(double vertLayoutX, double vertLayoutY) {
+        if (vertLayoutX <= 0) {
+            vertLayoutX = 0;
+        }
+        if (vertLayoutX >= mainPane.getWidth() - RADIUS * 2) {
+            vertLayoutX = mainPane.getWidth() - RADIUS * 2;
+        }
+        if (vertLayoutY <= 0) {
+            vertLayoutY = 0;
+        }
+        if (vertLayoutY >= mainPane.getHeight() - RADIUS * 2) {
+            vertLayoutY = mainPane.getHeight() - RADIUS * 2;
+        }
+
+        return new double[]{vertLayoutX, vertLayoutY};
     }
 }

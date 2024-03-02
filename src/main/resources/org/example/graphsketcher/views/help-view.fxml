@@ -133,7 +133,7 @@
             <Label text="Thực hiện chức năng &quot;Tìm bộ phận liên thông&quot;" GridPane.columnIndex="3" GridPane.rowIndex="4" />
          </children>
       </GridPane>
-      <Label prefHeight="33.0" prefWidth="680.0" text="LƯU Ý: Để thay đổi trọng số cung, double-click vào cung chứa trọng số cần thay đổi hoặc double-click vào trọng số cần thay đổi" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <Label prefHeight="33.0" prefWidth="680.0" text="LƯU Ý: Để thay đổi trọng số cung, double-click vào trọng số cần thay đổi" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <GridPane.margin>
             <Insets bottom="50.0" left="150.0" />
          </GridPane.margin>

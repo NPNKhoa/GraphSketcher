@@ -38,7 +38,7 @@
     -fx-opacity: 0.5;
 }
 
-.vertLabel {
+#vertLabel {
     -fx-font-size: 20;
     -fx-label-padding: 15;
     -fx-background-radius: 100;

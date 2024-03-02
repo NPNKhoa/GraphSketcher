@@ -3,6 +3,7 @@ package org.example.graphsketcher.graph;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import java.util.*;
 
@@ -24,8 +25,6 @@ public abstract class Graph {
         for (int i = 100; i >= 1; i --) {
             vertName.add(String.valueOf(i));
         }
-
-        generateRandomUniqueColor(colors);
     }
 
     /**
@@ -40,8 +39,6 @@ public abstract class Graph {
         for (int i = 100; i >= 1; i --) {
             vertName.add(String.valueOf(i));
         }
-
-        generateRandomUniqueColor(colors);
     }
 
     /**
@@ -64,6 +61,10 @@ public abstract class Graph {
         return vertName;
     }
 
+    public Set<Color> getColors() {
+        return colors;
+    }
+
     // =================================== ALGORITHMS =======================================
 
     /**
@@ -81,16 +82,17 @@ public abstract class Graph {
         while (!vertexStack.isEmpty()) {
             Vertex currentVert = vertexStack.pop();
 
-            if (currentVert.isVisited()) {
+            if (!currentVert.isVisited()) {
                 result.add(currentVert);
 
                 List<Vertex> neighbors = getUnvisitedNeighbors(currentVert);
                 for (Vertex neighbor : neighbors) {
                     vertexStack.push(neighbor);
                 }
+                currentVert.setVisited(true);
             }
         }
-        return  result;
+        return result;
     }
 
     // =================================== SUB-METHODS ===========================================
@@ -98,14 +100,19 @@ public abstract class Graph {
     /**
      * Generate random color and make it unique
      */
-    private void generateRandomUniqueColor(Set<Color> colors) {
-        double red = Math.random();
-        double green = Math.random();
-        double blue = Math.random();
+    public Set<Color> generateRandomUniqueColor(int n) {
+        Set<Color> colors = new HashSet<>();
 
-        Color randomColor = new Color(red, green, blue, 1.0);
+        for (int i = 0; i < n; i++) {
+            double red = Math.random();
+            double green = Math.random();
+            double blue = Math.random();
 
-        colors.add(randomColor);
+            Color randomColor = new Color(red, green, blue, 1.0);
+            colors.add(randomColor);
+        }
+
+        return colors;
     }
 
     /**
@@ -115,11 +122,12 @@ public abstract class Graph {
      */
     private List<Vertex> getUnvisitedNeighbors(Vertex vertex) {
         List<Vertex> neighbors = new ArrayList<>();
-        for (Edge edge : edges) {
-            if (edge.getBeginVert().equals(vertex) && !edge.getBeginVert().isVisited()) {
+        List<Edge> edgeList = getAllEdgesByVert(vertex);
+        for (Edge edge : edgeList) {
+            if (edge.getBeginVert() != vertex) {
                 neighbors.add(edge.getBeginVert());
             }
-            else if (edge.getEndVert().equals(vertex) && !edge.getEndVert().isVisited()) {
+            else if (edge.getEndVert() != vertex) {
                 neighbors.add(edge.getEndVert());
             }
         }
@@ -127,59 +135,6 @@ public abstract class Graph {
     }
 
     // ============================== EVENT HANDLER METHODS ======================================
-
-    /**
-     * Add vertex to vertexes list and create vertex label
-     * @return vertex label
-     */
-    public Label addVert(MouseEvent mouseEvent) {
-        /*
-        Create vertex label and set its properties
-         */
-        Label vertLabel = createVertLabel(mouseEvent);
-        vertLabel.setLayoutX(mouseEvent.getX());
-        vertLabel.setLayoutY(mouseEvent.getY());
-        vertLabel.setText(getVertName().getLast());
-        getVertName().removeLast();
-        vertLabel.getStyleClass().add("vertLabel");
-
-        /*
-        Create a vertex and set its properties
-         */
-        Vertex vertex = new Vertex();
-        vertex.setVertLabel(vertLabel);
-        vertex.setVisited(false);
-
-        // Add vertex to vertexes list in graph
-        vertexes.add(vertex);
-
-        return vertLabel;
-    }
-
-    /**
-     * Remove vertex by vertex label
-     * @param vertLabel vertex label
-     */
-    public void deleteVert(Label vertLabel) {
-        Vertex vertex = findVertByLabel(vertLabel);
-        vertName.add(vertex.getName());
-        // Lambda expression to sort vertName list
-        vertName.sort((s1, s2) -> Integer.compare(Integer.parseInt(s2), Integer.parseInt(s1)));
-        vertexes.remove(vertex);
-    }
-
-    /**
-     * Create vertex label
-     * @return vertex label
-     */
-    public Label createVertLabel(MouseEvent mouseEvent) {
-        Label vertLabel = new Label(vertName.getFirst());
-        vertLabel.setFont(new Font("System Bold", 24));
-        vertLabel.setId("vertLabel");
-        vertLabel.setLayoutX(mouseEvent.getX() - (vertLabel.getWidth() / 2));
-        vertLabel.setLayoutY(mouseEvent.getY() - (vertLabel.getHeight() / 2));
-        return vertLabel;
-    }
 
     /**
      * Find vertex by vertex label
@@ -210,4 +165,27 @@ public abstract class Graph {
      * @return an edge connecting 2 vertex passed into
      */
     public abstract Edge getEdgeByVert(Vertex beginVert, Vertex endVert);
+
+    /**
+     * Find edge by edge line
+     * @param edgeLine edge line
+     * @return edge if edge line exist, else null
+     */
+    public Edge getEdgeByEdgeLine(Line edgeLine) {
+        for (Edge edge : edges) {
+            if (edgeLine.equals(edge.getLineEdge())) {
+                return edge;
+            }
+        }
+        return null;
+    }
+
+    public Edge getEdgeByWeightLabel(Label weightLabel) {
+        for (Edge edge : edges) {
+            if (edge.getWeightLabel().equals(weightLabel)) {
+                return edge;
+            }
+        }
+        return null;
+    }
 }
