@@ -30,43 +30,72 @@ public class Edge {
         this.weightLabel = new Label(String.valueOf(weight));
     }
 
-
+    /**
+     * getter: Get begin vertex
+     */
     public Vertex getBeginVert() {
         return beginVert;
     }
 
+    /**
+     * setter: set begin vertex
+     */
     public void setBeginVert(Vertex beginVert) {
         this.beginVert = beginVert;
     }
 
+    /**
+     * getter: Get end vertex
+     */
     public Vertex getEndVert() {
         return endVert;
     }
 
+    /**
+     * setter: set end vertex
+     */
     public void setEndVert(Vertex endVert) {
         this.endVert = endVert;
     }
 
+    /**
+     * getter: Get weight
+     */
     public int getWeight() {
         return weight;
     }
 
+    /**
+     * setter: Set weight
+     */
     public void setWeight(int weight) {
         this.weight = weight;
     }
 
+    /**
+     * getter: Get weight label
+     */
     public Label getWeightLabel() {
         return weightLabel;
     }
 
+    /**
+     * setter: Set weight label
+     */
     public void setWeightLabel(Label weightLabel) {
         this.weightLabel = weightLabel;
     }
 
+    /**
+     * getter: Get line edge
+     */
     public Line getLineEdge() {
         return lineEdge;
     }
 
+    /**
+     * setter: Set line edge
+     */
     public void setLineEdge(Line lineEdge) {
         this.lineEdge = lineEdge;
     }

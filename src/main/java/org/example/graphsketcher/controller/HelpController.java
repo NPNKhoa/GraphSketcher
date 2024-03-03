@@ -18,6 +18,10 @@ public class HelpController {
     public Button backButton;
 
     // ================================ HANDLE EVENT =======================================
+
+    /**
+     * Handle the clicked event on back button
+     */
     public void backButtonOnClick(ActionEvent event) {
         try {
             switchToHomeView(event);
@@ -27,6 +31,10 @@ public class HelpController {
     }
 
     // ================================ LOGICAL CODE ========================================
+
+    /**
+     * Switching to home view
+     */
     public void switchToHomeView(ActionEvent event) throws IOException {
         Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
         GridPane layout = FXMLLoader.load(Objects.requireNonNull(Main.class.getResource("views/home-view.fxml")));
@@ -34,6 +42,4 @@ public class HelpController {
         stage.sizeToScene();
         stage.setScene(scene);
     }
-
-    // ================================ SUB-HANDLER ==========================================
 }

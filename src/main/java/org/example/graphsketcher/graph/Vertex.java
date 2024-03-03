@@ -6,13 +6,17 @@ public class Vertex {
     private Label vertLabel;
     private boolean isVisited;
 
-    // Default Constructor
+    /**
+     * Default constructor
+     */
     public Vertex() {
         this.vertLabel = new Label();
         this.isVisited = false;
     }
 
-    // Copy Constructor
+    /**
+     * Copy constructor
+     */
     public Vertex(Vertex vertex) {
         this.vertLabel = vertex.vertLabel;
         this.isVisited = vertex.isVisited;

@@ -213,6 +213,9 @@ public class HomeController implements Initializable {
 
     // ******************************* GRAPH'S ELEMENT *************************************
 
+    /**
+     * Handle the click event on vertex
+     */
     public void vertOnClick(MouseEvent mouseEvent) {
         if (isEnableDelete) {
             Label clickedVertLabel = (Label) mouseEvent.getSource();
@@ -234,6 +237,9 @@ public class HomeController implements Initializable {
         }
     }
 
+    /**
+     * Handle the press event on vertex
+     */
     public void vertOnPress(MouseEvent mouseEvent) {
         if (isEnableAddEdge) {
             startDrawEdge(mouseEvent);
@@ -244,6 +250,9 @@ public class HomeController implements Initializable {
         }
     }
 
+    /**
+     * Handle the drag event on vertex
+     */
     public void vertOnDrag(MouseEvent mouseEvent) {
         if (isEnableAddEdge) {
             drawEdge(mouseEvent);
@@ -254,6 +263,9 @@ public class HomeController implements Initializable {
         }
     }
 
+    /**
+     * Handle the release event on vertex
+     */
     public void vertOnRelease(MouseEvent mouseEvent) {
         if (isEnableAddEdge) {
             endDrawEdge(mouseEvent);
@@ -266,6 +278,9 @@ public class HomeController implements Initializable {
 
     // *********************************** OTHERS ******************************************
 
+    /**
+     * Handle the click event on canvas
+     */
     public void canvasOnClick(MouseEvent mouseEvent) {
         if (isEnableAddVert) {
             Label vertLabel = addVert(mouseEvent);
@@ -277,7 +292,7 @@ public class HomeController implements Initializable {
     // ================================ LOGICAL CODE ========================================
 
     /**
-     * Start drawing a line that represent for an edge
+     * Start drawing edge
      */
     private void startDrawEdge(MouseEvent mouseEvent) {
         selectedVertLabel = (Label) mouseEvent.getSource();
@@ -290,6 +305,9 @@ public class HomeController implements Initializable {
         mainPane.getChildren().add(temporaryLine);
     }
 
+    /**
+     * On drawing edge
+     */
     private void drawEdge(MouseEvent mouseEvent) {
         temporaryLine.setStartX(selectedVertLabel.getLayoutX() + selectedVertLabel.getWidth() / 2);
         temporaryLine.setStartY(selectedVertLabel.getLayoutY() + selectedVertLabel.getHeight() / 2);
@@ -297,6 +315,9 @@ public class HomeController implements Initializable {
         temporaryLine.setEndY(selectedVertLabel.getLayoutY() + mouseEvent.getY());
     }
 
+    /**
+     * End drawing edge
+     */
     private void endDrawEdge(MouseEvent mouseEvent) {
         Label releaseVertexLabel = getReleaseVertexLabel(mouseEvent);
 
@@ -312,10 +333,16 @@ public class HomeController implements Initializable {
         temporaryLine = null;
     }
 
+    /**
+     * Start moving vertex
+     */
     private void startMoveVert(MouseEvent mouseEvent) {
         selectedVertLabel = (Label) mouseEvent.getSource();
     }
 
+    /**
+     * On moving vertex
+     */
     private void moveVert(MouseEvent mouseEvent) {
         selectedVertLabel = (Label) mouseEvent.getSource();
 
@@ -346,6 +373,9 @@ public class HomeController implements Initializable {
         }
     }
 
+    /**
+     * End moving vertex
+     */
     private void endMoveVert() {
         selectedVertLabel = null;
     }
@@ -406,6 +436,10 @@ public class HomeController implements Initializable {
         });
     }
 
+    /**
+     * Show dialog allowing user to input the specified vertex starting traversal algorithm.
+     * @return vertex name
+     */
     private String showInputVertDialog() {
         List<Vertex> vertexes = graph.getVertexes();
         List<String> vertexString = new ArrayList<>();
@@ -493,6 +527,10 @@ public class HomeController implements Initializable {
         return lineEdge;
     }
 
+    /**
+     * Delete edge by edge line
+     * @param edgeLine edge line
+     */
     public void deleteEdge(Line edgeLine) {
         Edge edge = graph.getEdgeByEdgeLine(edgeLine);
         graph.getEdges().remove(edge);
@@ -530,6 +568,10 @@ public class HomeController implements Initializable {
         stage.setScene(scene);
     }
 
+    /**
+     * Change edge weight
+     * @param weight the clicked weight
+     */
     private void changeWeight(Label weight) {
         Edge edge = graph.getEdgeByWeightLabel(weight);
         mainPane.getChildren().remove(edge.getWeightLabel());
@@ -617,6 +659,10 @@ public class HomeController implements Initializable {
         isEnableDelete = false;
     }
 
+    /**
+     * Add event to the specified vertex
+     * @param vertLabel vertex label
+     */
     private void addEventToVert(Label vertLabel) {
         vertLabel.setOnMouseClicked(this::vertOnClick);
         vertLabel.setOnMousePressed(this::vertOnPress);
@@ -624,6 +670,10 @@ public class HomeController implements Initializable {
         vertLabel.setOnMouseReleased(this::vertOnRelease);
     }
 
+    /**
+     * Add event to the specified edge
+     * @param edgeLine edge line
+     */
     private void addEventToEdge(Line edgeLine) {
         edgeLine.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1 && isEnableDelete) {
@@ -632,6 +682,10 @@ public class HomeController implements Initializable {
         });
     }
 
+    /**
+     * Add event to the specified weight
+     * @param weight weight label
+     */
     private void addEventToWeight(Label weight) {
         weight.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
@@ -640,6 +694,11 @@ public class HomeController implements Initializable {
         });
     }
 
+    /**
+     * Get the vertex released
+     * @param mouseEvent mouse event, where the vertex released
+     * @return vertex label if the pointer inside a vertex, else null
+     */
     private Label getReleaseVertexLabel(MouseEvent mouseEvent) {
         Label vertLabel;
         Bounds bounds;
@@ -655,6 +714,11 @@ public class HomeController implements Initializable {
         return null;
     }
 
+    /**
+     * Show alert that can modify title and content
+     * @param title title
+     * @param content content
+     */
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -663,6 +727,10 @@ public class HomeController implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Get the vertex coordinates, which have x layout is vertLayoutX and y layout is vertLayoutY
+     * @return vertex coordinates in layout (x, y)
+     */
     private double[] getVertCoordinates(double vertLayoutX, double vertLayoutY) {
         if (vertLayoutX <= 0) {
             vertLayoutX = 0;

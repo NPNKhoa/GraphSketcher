@@ -1,10 +1,8 @@
 package org.example.graphsketcher.graph;
 
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 import java.util.*;
 
 public abstract class Graph {
@@ -57,10 +55,18 @@ public abstract class Graph {
         return this.edges;
     }
 
+    /**
+     * Get vertex name
+     * @return vert name list
+     */
     public List<String> getVertName() {
         return vertName;
     }
 
+    /**
+     * Get color set
+     * @return colors set
+     */
     public Set<Color> getColors() {
         return colors;
     }
@@ -99,6 +105,7 @@ public abstract class Graph {
 
     /**
      * Generate random color and make it unique
+     * @return a set of unique color
      */
     public Set<Color> generateRandomUniqueColor(int n) {
         Set<Color> colors = new HashSet<>();
@@ -155,9 +162,15 @@ public abstract class Graph {
 
     /**
      * Find edge by a vertex
+     * @return edge
      */
     public abstract Edge getEdgeByVert(Vertex vertex);
 
+    /**
+     * Find all edges that connect to specified vertex
+     * @param vertex vertex
+     * @return edges list
+     */
     public abstract List<Edge> getAllEdgesByVert(Vertex vertex);
 
     /**
@@ -180,6 +193,11 @@ public abstract class Graph {
         return null;
     }
 
+    /**
+     * Find edge by its weight label
+     * @param weightLabel weight label
+     * @return edge if the weight is existing else null
+     */
     public Edge getEdgeByWeightLabel(Label weightLabel) {
         for (Edge edge : edges) {
             if (edge.getWeightLabel().equals(weightLabel)) {
