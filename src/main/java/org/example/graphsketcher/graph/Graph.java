@@ -2,7 +2,10 @@ package org.example.graphsketcher.graph;
 
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
+import javafx.util.Pair;
+
 import java.util.*;
 
 public abstract class Graph {
@@ -12,6 +15,7 @@ public abstract class Graph {
     // A list that save vert name
     protected  List<String> vertName;
     protected Set<Color> colors;
+    private final int INFINITY = Integer.MAX_VALUE;
 
     // Default constructor
     public Graph() {
@@ -101,6 +105,43 @@ public abstract class Graph {
         return result;
     }
 
+    /**
+     * Dijsktra algorithm -  find the shortest path from a vertex to another
+     * @param beginVert start vertex
+     * @param endVert start vertex
+     * @return A pair that store the path and the distance
+     */
+    public List<Vertex> dijsktra(Vertex beginVert, Vertex endVert) {
+        Map<Vertex, Integer> distance = new HashMap<>();
+        Map<Vertex, Vertex> previous = new HashMap<>();
+        PriorityQueue<Vertex> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(distance::get));
+
+        for (Vertex vertex : vertexes) {
+            distance.put(vertex, vertex == beginVert ? 0 : INFINITY);
+            previous.put(vertex, null);
+            priorityQueue.add(vertex);
+        }
+
+        while (!priorityQueue.isEmpty()) {
+            Vertex currentVertex = priorityQueue.poll();
+
+            if (currentVertex == endVert) {
+                break;
+            }
+
+            for (Vertex neighbor : getUnvisitedNeighbors(currentVertex)) {
+                int alt = distance.get(currentVertex) + getEdgeByVert(currentVertex, neighbor).getWeight();
+                if (alt < distance.get(neighbor)) {
+                    distance.put(neighbor, alt);
+                    previous.put(neighbor, currentVertex);
+                    priorityQueue.remove(neighbor);
+                    priorityQueue.add(neighbor);
+                }
+            }
+        }
+        return  reconstructPath(previous, endVert);
+    }
+
     // =================================== SUB-METHODS ===========================================
 
     /**
@@ -131,14 +172,35 @@ public abstract class Graph {
         List<Vertex> neighbors = new ArrayList<>();
         List<Edge> edgeList = getAllEdgesByVert(vertex);
         for (Edge edge : edgeList) {
-            if (edge.getBeginVert() != vertex) {
+            if (edge.getBeginVert() != vertex && !edge.getBeginVert().isVisited()) {
                 neighbors.add(edge.getBeginVert());
             }
-            else if (edge.getEndVert() != vertex) {
+            else if (edge.getEndVert() != vertex && !edge.getEndVert().isVisited()) {
                 neighbors.add(edge.getEndVert());
             }
         }
         return neighbors;
+    }
+
+    private Queue<Vertex> getUnvisitedVert() {
+        Queue<Vertex> result = new LinkedList<>();
+        for (Vertex vertex : vertexes) {
+            if (!vertex.isVisited()) {
+                result.add(vertex);
+            }
+        }
+        return result;
+    }
+
+    private List<Vertex> reconstructPath(Map<Vertex, Vertex> previous, Vertex endVert) {
+        List<Vertex> path = new ArrayList<>();
+        Vertex currentVertex = endVert;
+        while (currentVertex != null) {
+            path.add(currentVertex);
+            currentVertex = previous.get(currentVertex);
+        }
+        Collections.reverse(path);
+        return path;
     }
 
     // ============================== EVENT HANDLER METHODS ======================================

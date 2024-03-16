@@ -27,6 +27,7 @@ public class UndirectedGraph extends Graph {
 
     @Override
     public Edge getEdgeByVert(Vertex beginVert, Vertex endVert) {
+        if (beginVert == endVert) return null;
         for (Edge edge : getEdges()) {
             if ((edge.getBeginVert() == beginVert && edge.getEndVert() == endVert) ||
                     (edge.getBeginVert() == endVert || edge.getEndVert() == beginVert)) {

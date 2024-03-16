@@ -1,5 +1,6 @@
 package org.example.graphsketcher.controller;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,6 +10,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.effect.Light;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -17,6 +19,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 import org.example.graphsketcher.Main;
 import org.example.graphsketcher.graph.Edge;
 import org.example.graphsketcher.graph.Graph;
@@ -176,7 +179,12 @@ public class HomeController implements Initializable {
      * Handle the click event on path button
      */
     public void pathBtnOnClick() {
-
+        notiField.clear();
+        List<Vertex> path = graph.dijsktra(graph.getVertexes().getFirst(), graph.getVertexes().getLast());
+        notiField.appendText("Shortest path from the start vertex to the end vertex: ");
+        for (Vertex vertex : path) {
+            notiField.appendText(vertex.getName() + " ");
+        }
     }
 
     /**
@@ -446,9 +454,11 @@ public class HomeController implements Initializable {
         for (Vertex v : vertexes) {
             vertexString.add(v.getName());
         }
+
         ChoiceDialog<String> dialog = new ChoiceDialog<>(vertexes.getFirst().getName(), vertexString);
         dialog.setTitle("Chọn đỉnh bắt đầu");
         dialog.setHeaderText(null);
+
         return dialog.showAndWait().get();
     }
 
