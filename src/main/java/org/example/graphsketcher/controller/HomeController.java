@@ -191,14 +191,25 @@ public class HomeController implements Initializable {
      * Handle the click event on cycle button
      */
     public void cycleBtnOnClick() {
-
+        notiField.clear();
+        List<Vertex> cycle = graph.findMinimumWeightCycle(graph.getVertexes().getFirst());
+        notiField.appendText("Minimum weight cycle from the first vertex: ");
+        for (Vertex vertex : cycle) {
+            notiField.appendText(vertex.getName() + " ");
+        }
     }
 
     /**
      * Handle the click event on tree button
      */
     public void treeBtnOnClick() {
-
+        notiField.clear();
+        List<Edge> mst = graph.minimumSpanningTree();
+        notiField.appendText("Minimum spanning tree in the graph: ");
+        for (Edge edge : mst) {
+            notiField.appendText( "Edge (" + edge.getBeginVert().getName()
+                    + ", " + edge.getEndVert().getName() + ") ");
+        }
     }
 
     /**

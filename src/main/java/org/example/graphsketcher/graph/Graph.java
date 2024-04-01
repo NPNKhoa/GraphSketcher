@@ -139,7 +139,78 @@ public abstract class Graph {
                 }
             }
         }
-        return  reconstructPath(previous, endVert);
+        return reconstructPath(previous, endVert);
+    }
+
+    public List<Vertex> findMinimumWeightCycle(Vertex startVert) {
+        Map<Vertex, Integer> distance = new HashMap<>();
+        Map<Vertex, Vertex> previous = new HashMap<>();
+
+        // Initialize distances
+        for (Vertex vertex : vertexes) {
+            distance.put(vertex, vertex == startVert ? 0 : INFINITY);
+            previous.put(vertex, null);
+        }
+
+        // Relax edges repeatedly
+        for (int i = 0; i < vertexes.size() - 1; i++) {
+            for (Edge edge : edges) {
+                Vertex u = edge.getBeginVert();
+                Vertex v = edge.getEndVert();
+                int weight = edge.getWeight();
+                if (distance.get(u) + weight < distance.get(v)) {
+                    distance.put(v, distance.get(u) + weight);
+                    previous.put(v, u);
+                }
+            }
+        }
+
+        // Check for negative weight cycles
+        for (Edge edge : edges) {
+            Vertex u = edge.getBeginVert();
+            Vertex v = edge.getEndVert();
+            int weight = edge.getWeight();
+            if (distance.get(u) + weight < distance.get(v)) {
+                // Negative weight cycle found
+                return reconstructCycle(previous, u);
+            }
+        }
+
+        return null; // No negative weight cycle found
+    }
+
+    public List<Edge> minimumSpanningTree() {
+        List<Edge> mst = new ArrayList<>();
+        Set<Vertex> visited = new HashSet<>();
+        PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparingInt(Edge::getWeight));
+
+        if (!vertexes.isEmpty()) {
+            Vertex startVertex = vertexes.get(0); // Start from the first vertex
+            visited.add(startVertex);
+            pq.addAll(getAllEdgesByVert(startVertex));
+        }
+
+        while (!pq.isEmpty()) {
+            Edge minEdge = pq.poll();
+            Vertex u = minEdge.getBeginVert();
+            Vertex v = minEdge.getEndVert();
+
+            if (visited.contains(u) && visited.contains(v))
+                continue; // Skip edges that connect two visited vertices
+
+            mst.add(minEdge);
+            visited.add(u);
+            visited.add(v);
+
+            if (!visited.contains(u)) {
+                pq.addAll(getAllEdgesByVert(u));
+            }
+            if (!visited.contains(v)) {
+                pq.addAll(getAllEdgesByVert(v));
+            }
+        }
+
+        return mst;
     }
 
     // =================================== SUB-METHODS ===========================================
@@ -201,6 +272,25 @@ public abstract class Graph {
         }
         Collections.reverse(path);
         return path;
+    }
+
+    private List<Vertex> reconstructCycle(Map<Vertex, Vertex> previous, Vertex startVert) {
+        List<Vertex> cycle = new ArrayList<>();
+        Set<Vertex> visited = new HashSet<>();
+        Vertex current = startVert;
+
+        while (!visited.contains(current)) {
+            cycle.add(current);
+            visited.add(current);
+            current = previous.get(current);
+        }
+
+        // Find the start of the cycle
+        int startIndex = cycle.indexOf(current);
+        cycle = cycle.subList(startIndex, cycle.size());
+        Collections.reverse(cycle);
+
+        return cycle;
     }
 
     // ============================== EVENT HANDLER METHODS ======================================
