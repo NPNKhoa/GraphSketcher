@@ -105,40 +105,32 @@ public abstract class Graph {
         return result;
     }
 
-    /**
-     * Dijsktra algorithm -  find the shortest path from a vertex to another
-     * @param beginVert start vertex
-     * @param endVert start vertex
-     * @return A pair that store the path and the distance
-     */
-    public List<Vertex> dijsktra(Vertex beginVert, Vertex endVert) {
+    public List<Vertex> dijsktra(Vertex startVert, Vertex endVert) {
         Map<Vertex, Integer> distance = new HashMap<>();
         Map<Vertex, Vertex> previous = new HashMap<>();
-        PriorityQueue<Vertex> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(distance::get));
+        Queue<Vertex> unvisitedVert = getUnvisitedVert();
 
+        // Initialize distances
         for (Vertex vertex : vertexes) {
-            distance.put(vertex, vertex == beginVert ? 0 : INFINITY);
+            distance.put(vertex, vertex == startVert ? 0 : INFINITY);
             previous.put(vertex, null);
-            priorityQueue.add(vertex);
         }
 
-        while (!priorityQueue.isEmpty()) {
-            Vertex currentVertex = priorityQueue.poll();
+        while (!unvisitedVert.isEmpty()) {
+            Vertex currentVert = unvisitedVert.poll();
+            List<Edge> neighbors = getAllEdgesByVert(currentVert);
 
-            if (currentVertex == endVert) {
-                break;
-            }
+            for (Edge edge : neighbors) {
+                Vertex neighbor = edge.getBeginVert() == currentVert ? edge.getEndVert() : edge.getBeginVert();
+                int newDistance = distance.get(currentVert) + edge.getWeight();
 
-            for (Vertex neighbor : getUnvisitedNeighbors(currentVertex)) {
-                int alt = distance.get(currentVertex) + getEdgeByVert(currentVertex, neighbor).getWeight();
-                if (alt < distance.get(neighbor)) {
-                    distance.put(neighbor, alt);
-                    previous.put(neighbor, currentVertex);
-                    priorityQueue.remove(neighbor);
-                    priorityQueue.add(neighbor);
+                if (newDistance < distance.get(neighbor)) {
+                    distance.put(neighbor, newDistance);
+                    previous.put(neighbor, currentVert);
                 }
             }
         }
+
         return reconstructPath(previous, endVert);
     }
 
