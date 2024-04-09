@@ -183,7 +183,9 @@ public class HomeController implements Initializable {
         List<Vertex> path = graph.dijsktra(graph.getVertexes().getFirst(), graph.getVertexes().getLast());
         notiField.appendText("Shortest path from the start vertex to the end vertex: ");
         for (Vertex vertex : path) {
-            notiField.appendText(vertex.getName() + " ");
+            if (vertex != null) {
+                notiField.appendText(vertex.getName() + " ");
+            }
         }
     }
 
@@ -195,7 +197,9 @@ public class HomeController implements Initializable {
         List<Vertex> cycle = graph.findMinimumWeightCycle(graph.getVertexes().getFirst());
         notiField.appendText("Minimum weight cycle from the first vertex: ");
         for (Vertex vertex : cycle) {
-            notiField.appendText(vertex.getName() + " ");
+            if (vertex != null) {
+                notiField.appendText(vertex.getName() + " ");
+            }
         }
     }
 
@@ -204,7 +208,7 @@ public class HomeController implements Initializable {
      */
     public void treeBtnOnClick() {
         notiField.clear();
-        List<Edge> mst = graph.minimumSpanningTree();
+        List<Edge> mst = graph.findSpanningTree();
         notiField.appendText("Minimum spanning tree in the graph: ");
         for (Edge edge : mst) {
             notiField.appendText( "Edge (" + edge.getBeginVert().getName()

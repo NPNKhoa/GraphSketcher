@@ -110,6 +110,10 @@ public abstract class Graph {
         Map<Vertex, Vertex> previous = new HashMap<>();
         Queue<Vertex> unvisitedVert = getUnvisitedVert();
 
+        if (Integer.parseInt(startVert.getName()) > Integer.parseInt(endVert.getName())) {
+            unvisitedVert = getUnvisitedVertReverse();
+        }
+
         // Initialize distances
         for (Vertex vertex : vertexes) {
             distance.put(vertex, vertex == startVert ? 0 : INFINITY);
@@ -134,41 +138,74 @@ public abstract class Graph {
         return reconstructPath(previous, endVert);
     }
 
+    /**
+     * find the minimum weight cycle that passes through all the vertexes in the graph
+     * @param startVert start vertex
+     * @return the minimum weight cycle
+     */
     public List<Vertex> findMinimumWeightCycle(Vertex startVert) {
-        Map<Vertex, Integer> distance = new HashMap<>();
-        Map<Vertex, Vertex> previous = new HashMap<>();
+        Vertex endVert = vertexes.getLast();
 
-        // Initialize distances
-        for (Vertex vertex : vertexes) {
-            distance.put(vertex, vertex == startVert ? 0 : INFINITY);
-            previous.put(vertex, null);
+        List<Edge> copyEdges = new ArrayList<>(edges);
+
+        List<Vertex> pathFromStartToEnd = dijsktra(startVert, endVert);
+
+
+        List<Edge> traveledEdges = getEdgesFromShortestPath(pathFromStartToEnd);
+        edges.removeAll(traveledEdges);
+
+        List<Vertex> pathFromEndToStart = dijsktra(endVert, startVert);
+
+        List<Vertex> cycle = new ArrayList<>(pathFromStartToEnd);
+        cycle.addAll(pathFromEndToStart.subList(1, pathFromEndToStart.size()));
+
+        edges.clear();
+        edges.addAll(copyEdges);
+        return cycle;
+    }
+
+    public List<Edge> findSpanningTree() {
+        List<Edge> spanningTree = new ArrayList<>();
+        Set<Vertex> visited = new HashSet<>();
+        PriorityQueue<Pair<Edge, Integer>> pq = new PriorityQueue<>(Comparator.comparingInt(Pair::getValue));
+
+        if (!vertexes.isEmpty()) {
+            Vertex startVertex = vertexes.get(0); // Start from the first vertex
+            visited.add(startVertex);
+            List<Edge> neighbors = getAllEdgesByVert(startVertex);
+            for (Edge edge : neighbors) {
+                pq.add(new Pair<>(edge, edge.getWeight()));
+            }
         }
 
-        // Relax edges repeatedly
-        for (int i = 0; i < vertexes.size() - 1; i++) {
-            for (Edge edge : edges) {
-                Vertex u = edge.getBeginVert();
-                Vertex v = edge.getEndVert();
-                int weight = edge.getWeight();
-                if (distance.get(u) + weight < distance.get(v)) {
-                    distance.put(v, distance.get(u) + weight);
-                    previous.put(v, u);
+        while (!pq.isEmpty()) {
+            Pair<Edge, Integer> minEdge = pq.poll();
+            Edge edge = minEdge.getKey();
+            Vertex u = edge.getBeginVert();
+            Vertex v = edge.getEndVert();
+
+            if (visited.contains(u) && visited.contains(v))
+                continue; // Skip edges that connect two visited vertices
+
+            spanningTree.add(edge);
+            visited.add(u);
+            visited.add(v);
+
+            if (!visited.contains(u)) {
+                List<Edge> neighbors = getAllEdgesByVert(u);
+                for (Edge neighbor : neighbors) {
+                    pq.add(new Pair<>(neighbor, neighbor.getWeight()));
+                }
+            }
+            if (!visited.contains(v)) {
+                List<Edge> neighbors = getAllEdgesByVert(v);
+                for (Edge neighbor : neighbors) {
+                    pq.add(new Pair<>(neighbor, neighbor.getWeight()));
                 }
             }
         }
 
-        // Check for negative weight cycles
-        for (Edge edge : edges) {
-            Vertex u = edge.getBeginVert();
-            Vertex v = edge.getEndVert();
-            int weight = edge.getWeight();
-            if (distance.get(u) + weight < distance.get(v)) {
-                // Negative weight cycle found
-                return reconstructCycle(previous, u);
-            }
-        }
-
-        return null; // No negative weight cycle found
+        return spanningTree;
     }
 
     public List<Edge> minimumSpanningTree() {
@@ -255,6 +292,16 @@ public abstract class Graph {
         return result;
     }
 
+    private Queue<Vertex> getUnvisitedVertReverse() {
+        Queue<Vertex> result = new LinkedList<>();
+        for (int i = vertexes.size() - 1; i >= 0; i--) {
+            if (!vertexes.get(i).isVisited()) {
+                result.add(vertexes.get(i));
+            }
+        }
+        return result;
+    }
+
     private List<Vertex> reconstructPath(Map<Vertex, Vertex> previous, Vertex endVert) {
         List<Vertex> path = new ArrayList<>();
         Vertex currentVertex = endVert;
@@ -264,6 +311,31 @@ public abstract class Graph {
         }
         Collections.reverse(path);
         return path;
+    }
+
+    private List<Edge> getEdgesFromShortestPath(List<Vertex> shortestPath) {
+        List<Edge> result = new ArrayList<>();
+
+        for (Edge edge : edges) {
+            for (int i = 0; i < shortestPath.size() - 1; i++) {
+                if (edge == getExactlyEdge(shortestPath.get(i), shortestPath.get(i + 1))) {
+                    result.add(edge);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private int calculateCycleWeight(List<Vertex> cycle) {
+        int weight = 0;
+        for (int i = 0; i < cycle.size() - 1; i++) {
+            Vertex u = cycle.get(i);
+            Vertex v = cycle.get(i + 1);
+            Edge edge = getEdgeByVert(u, v);
+            weight += edge.getWeight();
+        }
+        return weight;
     }
 
     private List<Vertex> reconstructCycle(Map<Vertex, Vertex> previous, Vertex startVert) {
@@ -322,6 +394,15 @@ public abstract class Graph {
      * @return an edge connecting 2 vertex passed into
      */
     public abstract Edge getEdgeByVert(Vertex beginVert, Vertex endVert);
+
+    public Edge getExactlyEdge(Vertex beginVert, Vertex endVert) {
+        for (Edge edge : edges) {
+            if (edge.getBeginVert() == beginVert && edge.getEndVert() == endVert) {
+                return edge;
+            }
+        }
+        return null;
+    }
 
     /**
      * Find edge by edge line
