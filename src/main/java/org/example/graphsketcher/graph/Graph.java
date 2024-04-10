@@ -1,6 +1,7 @@
 package org.example.graphsketcher.graph;
 
 import javafx.scene.control.Label;
+import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
@@ -162,6 +163,53 @@ public abstract class Graph {
         edges.clear();
         edges.addAll(copyEdges);
         return cycle;
+    }
+
+    /**
+     * Prim algorithm to find minimum spanning tree
+     * @param startVert start vertex
+     * @return minimum spanning tree
+     */
+    public List<Edge> prim(Vertex startVert) {
+        // Step 1: Initialize an empty set to store the minimum spanning tree.
+        List<Edge> mst = new ArrayList<>();
+        Set<Vertex> visited = new HashSet<>();
+
+        // Step 2: Choose any vertex as a starting point and add it to the set representing the minimum spanning tree.
+        visited.add(startVert);
+
+        // Create a priority queue to store the edges to be processed, sorted by weight
+        PriorityQueue<Edge> edgesQueue = new PriorityQueue<>(Comparator.comparingInt(Edge::getWeight));
+
+        // Add all edges of the starting vertex to the queue
+        edgesQueue.addAll(getAllEdgesByVert(startVert));
+
+        // Step 3: Repeat until all vertices have been added to the minimum spanning tree
+        while (!edgesQueue.isEmpty()) {
+            // Step 3a: Find the minimum-weight edge that connects a vertex in the tree to a vertex not in the tree.
+            Edge minEdge = edgesQueue.poll();
+            Vertex u = minEdge.getBeginVert();
+            Vertex v = minEdge.getEndVert();
+
+            // Check if the edge connects a vertex in the tree to a vertex not in the tree
+            if (visited.contains(u) && visited.contains(v)) {
+                continue;
+            }
+
+            // Step 3b: Add that edge to the minimum spanning tree and mark the vertex as added.
+            mst.add(minEdge);
+            if (!visited.contains(u)) {
+                visited.add(u);
+                edgesQueue.addAll(getAllEdgesByVert(u));
+            }
+            if (!visited.contains(v)) {
+                visited.add(v);
+                edgesQueue.addAll(getAllEdgesByVert(v));
+            }
+        }
+
+        // Step 4: Finish when all vertices have been added to the minimum spanning tree.
+        return mst;
     }
 
     public List<Edge> findSpanningTree() {
@@ -430,5 +478,21 @@ public abstract class Graph {
             }
         }
         return null;
+    }
+
+    /**
+     * Get weight by 2 vertexes
+     * @param startVert start vertex
+     * @param endVert end vertex
+     * @return weight of the edge connecting 2 vertexes
+     */
+    public int getWeightByVertexes(Vertex startVert, Vertex endVert) {
+        for (Edge edge : edges) {
+            if ((edge.getBeginVert() == startVert && edge.getEndVert() == endVert) ||
+                    (edge.getBeginVert() == endVert && edge.getEndVert() == startVert)) {
+                return edge.getWeight();
+            }
+        }
+        return 0;
     }
 }
