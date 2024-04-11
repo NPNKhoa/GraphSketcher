@@ -208,13 +208,7 @@ public class HomeController implements Initializable {
      */
     public void treeBtnOnClick() {
         notiField.clear();
-        List<Edge> mst = graph.prim(graph.getVertexes().getFirst());
-
-        for (Edge edge : mst) {
-            edge.getLineEdge().setStroke(Color.RED);
-            edge.getLineEdge().setStrokeWidth(4.0);
-        }
-
+        List<Edge> mst = graph.findSpanningTree();
         notiField.appendText("Minimum spanning tree in the graph: ");
         for (Edge edge : mst) {
             notiField.appendText( "Edge (" + edge.getBeginVert().getName()
