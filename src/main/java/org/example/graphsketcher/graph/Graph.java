@@ -2,10 +2,7 @@ package org.example.graphsketcher.graph;
 
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
-
 import java.util.*;
 
 public abstract class Graph {
@@ -164,81 +161,49 @@ public abstract class Graph {
         return cycle;
     }
 
-    public List<Edge> findSpanningTree() {
-        List<Edge> spanningTree = new ArrayList<>();
-        Set<Vertex> visited = new HashSet<>();
-        PriorityQueue<Pair<Edge, Integer>> pq = new PriorityQueue<>(Comparator.comparingInt(Pair::getValue));
-
-        if (!vertexes.isEmpty()) {
-            Vertex startVertex = vertexes.get(0); // Start from the first vertex
-            visited.add(startVertex);
-            List<Edge> neighbors = getAllEdgesByVert(startVertex);
-            for (Edge edge : neighbors) {
-                pq.add(new Pair<>(edge, edge.getWeight()));
-            }
-        }
-
-        while (!pq.isEmpty()) {
-            Pair<Edge, Integer> minEdge = pq.poll();
-            Edge edge = minEdge.getKey();
-            Vertex u = edge.getBeginVert();
-            Vertex v = edge.getEndVert();
-
-            if (visited.contains(u) && visited.contains(v))
-                continue; // Skip edges that connect two visited vertices
-
-            spanningTree.add(edge);
-            visited.add(u);
-            visited.add(v);
-
-            if (!visited.contains(u)) {
-                List<Edge> neighbors = getAllEdgesByVert(u);
-                for (Edge neighbor : neighbors) {
-                    pq.add(new Pair<>(neighbor, neighbor.getWeight()));
-                }
-            }
-            if (!visited.contains(v)) {
-                List<Edge> neighbors = getAllEdgesByVert(v);
-                for (Edge neighbor : neighbors) {
-                    pq.add(new Pair<>(neighbor, neighbor.getWeight()));
-                }
-            }
-        }
-
-        return spanningTree;
-    }
-
-    public List<Edge> minimumSpanningTree() {
+    /**
+     * Prim algorithm to find minimum spanning tree
+     * @param startVert start vertex
+     * @return minimum spanning tree
+     */
+    public List<Edge> prim(Vertex startVert) {
+        // Initialize
         List<Edge> mst = new ArrayList<>();
         Set<Vertex> visited = new HashSet<>();
-        PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparingInt(Edge::getWeight));
 
-        if (!vertexes.isEmpty()) {
-            Vertex startVertex = vertexes.get(0); // Start from the first vertex
-            visited.add(startVertex);
-            pq.addAll(getAllEdgesByVert(startVertex));
-        }
+        // Add start vertex the set representing the minimum spanning tree.
+        visited.add(startVert);
 
-        while (!pq.isEmpty()) {
-            Edge minEdge = pq.poll();
+        // Create a priority queue to store the edges to be processed, sorted by weight
+        PriorityQueue<Edge> edgesQueue = new PriorityQueue<>(Comparator.comparingInt(Edge::getWeight));
+
+        // Add all edges of the starting vertex to the queue
+        edgesQueue.addAll(getAllEdgesByVert(startVert));
+
+        while (!edgesQueue.isEmpty()) {
+            // Find the minimum-weight edge that connects a vertex in the tree to a vertex not in the tree.
+            Edge minEdge = edgesQueue.poll();
             Vertex u = minEdge.getBeginVert();
             Vertex v = minEdge.getEndVert();
 
-            if (visited.contains(u) && visited.contains(v))
-                continue; // Skip edges that connect two visited vertices
+            // If the edge connects a vertex in the tree to a vertex not in the tree
+            if (visited.contains(u) && visited.contains(v)) {
+                continue;
+            }
 
+            // Add that edge to the minimum spanning tree and mark the vertex as added.
             mst.add(minEdge);
-            visited.add(u);
-            visited.add(v);
-
             if (!visited.contains(u)) {
-                pq.addAll(getAllEdgesByVert(u));
+                visited.add(u);
+                edgesQueue.addAll(getAllEdgesByVert(u));
             }
             if (!visited.contains(v)) {
-                pq.addAll(getAllEdgesByVert(v));
+                visited.add(v);
+                edgesQueue.addAll(getAllEdgesByVert(v));
             }
         }
 
+        // Step 4: Finish when all vertices have been added to the minimum spanning tree.
         return mst;
     }
 
@@ -327,36 +292,6 @@ public abstract class Graph {
         return result;
     }
 
-    private int calculateCycleWeight(List<Vertex> cycle) {
-        int weight = 0;
-        for (int i = 0; i < cycle.size() - 1; i++) {
-            Vertex u = cycle.get(i);
-            Vertex v = cycle.get(i + 1);
-            Edge edge = getEdgeByVert(u, v);
-            weight += edge.getWeight();
-        }
-        return weight;
-    }
-
-    private List<Vertex> reconstructCycle(Map<Vertex, Vertex> previous, Vertex startVert) {
-        List<Vertex> cycle = new ArrayList<>();
-        Set<Vertex> visited = new HashSet<>();
-        Vertex current = startVert;
-
-        while (!visited.contains(current)) {
-            cycle.add(current);
-            visited.add(current);
-            current = previous.get(current);
-        }
-
-        // Find the start of the cycle
-        int startIndex = cycle.indexOf(current);
-        cycle = cycle.subList(startIndex, cycle.size());
-        Collections.reverse(cycle);
-
-        return cycle;
-    }
-
     // ============================== EVENT HANDLER METHODS ======================================
 
     /**
@@ -372,6 +307,18 @@ public abstract class Graph {
             }
         }
         return result;
+    }
+
+    /**
+     * Tìm đỉnh dựa trên tên của đỉnh
+     * @param name tên
+     * @return đỉnh tuơng ứng
+     */
+    public Vertex findVertByName(String name) {
+        for(int i = 0; i < vertexes.size(); i++)
+            if(vertexes.get(i).getName().compareTo(name) == 0)
+                return vertexes.get(i);
+        return null;
     }
 
     // ============================== ABSTRACT METHODS ======================================

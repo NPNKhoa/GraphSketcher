@@ -1,5 +1,6 @@
 package org.example.graphsketcher.controller;
 
+import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,6 +26,7 @@ import org.example.graphsketcher.graph.Edge;
 import org.example.graphsketcher.graph.Graph;
 import org.example.graphsketcher.graph.UndirectedGraph;
 import org.example.graphsketcher.graph.Vertex;
+import org.example.graphsketcher.services.File;
 
 import java.io.IOException;
 import java.net.URL;
@@ -62,7 +64,9 @@ public class HomeController implements Initializable {
     @FXML
     public  Button treeBtn;
     @FXML
-    public  Button connectBtn;
+    public  Button saveBtn;
+    @FXML
+    public  Button openBtn;
     private boolean isEnableAddVert;
     private boolean isEnableAddEdge;
     private boolean isEnableMove;
@@ -166,13 +170,20 @@ public class HomeController implements Initializable {
         List<Vertex> traveledVert = graph.depthFirstSearch(beginVert);
         Color color = new Color(0.32, 1.0, 0.1, 1.0);
         BackgroundFill backgroundFill = new BackgroundFill(color, new CornerRadii(10.0, true), null);
+
+        double delay = 1.0;
         for (Vertex vert : traveledVert) {
-            vert.getVertLabel().setBackground(new Background(backgroundFill));
+            PauseTransition pause = new PauseTransition(javafx.util.Duration.seconds(delay));
+            pause.setOnFinished(e -> {
+                vert.getVertLabel().setBackground(new Background(backgroundFill));
+            });
+//            vert.getVertLabel().setBackground(new Background(backgroundFill));
         }
         notiField.setText("Kết quả duyệt đồ thị: ");
         for (Vertex vert : traveledVert) {
             notiField.appendText(vert.getName() + ", ");
         }
+        resetVisitedVert();
     }
 
     /**
@@ -187,6 +198,7 @@ public class HomeController implements Initializable {
                 notiField.appendText(vertex.getName() + " ");
             }
         }
+        resetVisitedVert();
     }
 
     /**
@@ -201,6 +213,7 @@ public class HomeController implements Initializable {
                 notiField.appendText(vertex.getName() + " ");
             }
         }
+        resetVisitedVert();
     }
 
     /**
@@ -208,19 +221,40 @@ public class HomeController implements Initializable {
      */
     public void treeBtnOnClick() {
         notiField.clear();
-        List<Edge> mst = graph.findSpanningTree();
+        List<Edge> mst = graph.prim(graph.getVertexes().getFirst());
+
+        for (Edge edge : mst) {
+            edge.getLineEdge().setStrokeWidth(3.0);
+            edge.getLineEdge().setStroke(Color.RED);
+        }
+
         notiField.appendText("Minimum spanning tree in the graph: ");
         for (Edge edge : mst) {
             notiField.appendText( "Edge (" + edge.getBeginVert().getName()
                     + ", " + edge.getEndVert().getName() + ") ");
         }
+        resetVisitedVert();
     }
 
     /**
-     * Handle the click event on connect button
+     * Handle the click event on save button
      */
-    public void connectBtnOnClick() {
+    public void saveBtnOnClick(MouseEvent mouseEvent) {
+        File.graph = this.graph;
+        File.saveGraph(mouseEvent);
+    }
 
+    /**
+     * Handle the click event on open button
+     */
+    public void openBtnOnClick(MouseEvent mouseEvent) {
+        mainPane.getChildren().clear();
+        mainPane.getChildren().add(canvas);
+
+        File.graph = this.graph;
+        File.mainPane = this.mainPane;
+        File.loadGraph(mouseEvent);
+        resetVisitedVert();
     }
 
     /**
@@ -536,7 +570,7 @@ public class HomeController implements Initializable {
      * @param endVertLabel end vertex label
      * @return an edge that have start, end vertex label and its weight
      */
-    private Line addEdge(Label startVertLabel, Label endVertLabel) {
+    public Line addEdge(Label startVertLabel, Label endVertLabel) {
         double[] coordinates = calculateCoordinates(startVertLabel, endVertLabel, RADIUS);
 
         Line lineEdge = new Line();
@@ -567,7 +601,7 @@ public class HomeController implements Initializable {
      * Calculate the coordinates so that the distance of the line connecting two vertices is shortest
      * @return an array with 4 coordinates in order startX, startY, endX, endY
      */
-    private double[] calculateCoordinates(Label startVertLabel, Label endVertLabel, int radius) {
+    public double[] calculateCoordinates(Label startVertLabel, Label endVertLabel, int radius) {
 
         // coordinates variable is considered as coordinates of a line in order startX, startY, endX, endY
         double[] coordinates = new double[4];
@@ -582,6 +616,7 @@ public class HomeController implements Initializable {
 
         return coordinates;
     }
+
     /**
      * Switching to Help scene
      */
@@ -619,7 +654,8 @@ public class HomeController implements Initializable {
         pathBtn.setFocusTraversable(false);
         cycleBtn.setFocusTraversable(false);
         treeBtn.setFocusTraversable(false);
-        connectBtn.setFocusTraversable(false);
+        saveBtn.setFocusTraversable(false);
+        openBtn.setFocusTraversable(false);
 
         helpButton.setFocusTraversable(false);
     }
@@ -699,7 +735,7 @@ public class HomeController implements Initializable {
      * Add event to the specified edge
      * @param edgeLine edge line
      */
-    private void addEventToEdge(Line edgeLine) {
+    public void addEventToEdge(Line edgeLine) {
         edgeLine.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1 && isEnableDelete) {
                 deleteEdge(edgeLine);
@@ -711,7 +747,7 @@ public class HomeController implements Initializable {
      * Add event to the specified weight
      * @param weight weight label
      */
-    private void addEventToWeight(Label weight) {
+    public void addEventToWeight(Label weight) {
         weight.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 changeWeight(weight);
@@ -771,5 +807,14 @@ public class HomeController implements Initializable {
         }
 
         return new double[]{vertLayoutX, vertLayoutY};
+    }
+
+    /**
+     * Reset all vertexes' visited state
+     */
+    private void resetVisitedVert() {
+        for (Vertex vertex : graph.getVertexes()) {
+            vertex.setVisited(false);
+        }
     }
 }
