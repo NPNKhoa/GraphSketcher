@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 import org.example.graphsketcher.controller.HomeController;
 import org.example.graphsketcher.graph.Edge;
 import org.example.graphsketcher.graph.Graph;
+import org.example.graphsketcher.graph.UndirectedGraph;
 import org.example.graphsketcher.graph.Vertex;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -17,7 +18,6 @@ import javafx.stage.FileChooser;
 import java.io.*;
 
 public class File {
-    public static Graph graph;
     public static HomeController homeController = new HomeController();
     public static Pane mainPane;
 
@@ -25,7 +25,7 @@ public class File {
      * Show window allowing user to save graph
      * @param event event that triggered the method
      */
-    public static void saveGraph(MouseEvent event) {
+    public static void saveGraph(MouseEvent event, Graph graph) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save graph");
         fileChooser.getExtensionFilters().add(
@@ -69,7 +69,7 @@ public class File {
      * Load graph from file
      * @param event event that triggered the method
      */
-    public static void loadGraph(MouseEvent event) {
+    public static void loadGraph(MouseEvent event, Graph graph) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open graph");
         fileChooser.getExtensionFilters().add(
@@ -97,12 +97,14 @@ public class File {
                     else if (count >= 1 && count <= vertNumber) {
                         // invoke the method to add a vertex to the graph
                         graph.getVertexes().add(initVertFromFile(parts));
-                        mainPane.getChildren().add(graph.getVertexes().getLast().getVertLabel());
+                        Label vertLabel = graph.getVertexes().getLast().getVertLabel();
+                        mainPane.getChildren().add(vertLabel);
+                        homeController.addEventToVert(vertLabel);
                         graph.getVertName().remove(parts[0]);
                     }
                     else {
                         // invoke the method to add an edge to the graph
-                        addEdge(parts);
+                        addEdge(graph, parts);
                     }
 
                     count++;
@@ -163,7 +165,7 @@ public class File {
      * Initialize an edge from data reading from file
      * @param parts parts of the line, separated by a tab character
      */
-    private static void addEdge(String[] parts) {
+    private static void addEdge(Graph graph, String[] parts) {
         Vertex beginVert = graph.findVertByName(parts[0]);
         Vertex endVert = graph.findVertByName(parts[1]);
 
@@ -187,7 +189,6 @@ public class File {
             edge.setEndVert(endVert);
             edge.setWeight(iWeight);
 
-
             /*
                 Create a label representing for edge weight
              */
@@ -202,8 +203,8 @@ public class File {
             graph.getEdges().add(edge);
 
             mainPane.getChildren().add(lineEdge);
-            mainPane.getChildren().add(weightLabel);
             homeController.addEventToEdge(lineEdge);
+            mainPane.getChildren().add(weightLabel);
             homeController.addEventToWeight(weightLabel);
         }
     }

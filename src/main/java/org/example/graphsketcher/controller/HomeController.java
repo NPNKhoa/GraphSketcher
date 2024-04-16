@@ -1,6 +1,7 @@
 package org.example.graphsketcher.controller;
 
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -161,12 +162,7 @@ public class HomeController implements Initializable {
      */
     public void travelBtnOnClick() {
         String beginVertString = showInputVertDialog();
-        Vertex beginVert = new Vertex();
-        for (Vertex vertex : graph.getVertexes()) {
-            if (Objects.equals(vertex.getName(), beginVertString)) {
-                beginVert = vertex;
-            }
-        }
+        Vertex beginVert = getVertByStringName(beginVertString);
         List<Vertex> traveledVert = graph.depthFirstSearch(beginVert);
         Color color = new Color(0.32, 1.0, 0.1, 1.0);
         BackgroundFill backgroundFill = new BackgroundFill(color, new CornerRadii(10.0, true), null);
@@ -190,8 +186,12 @@ public class HomeController implements Initializable {
      * Handle the click event on path button
      */
     public void pathBtnOnClick() {
+        List<String> inputVertexes = showInputVertexesDialog();
+        Vertex beginVert = getVertByStringName(inputVertexes.getFirst());
+        Vertex endVert = getVertByStringName(inputVertexes.getLast());
+
         notiField.clear();
-        List<Vertex> path = graph.dijsktra(graph.getVertexes().getFirst(), graph.getVertexes().getLast());
+        List<Vertex> path = graph.dijsktra(beginVert, endVert);
         notiField.appendText("Shortest path from the start vertex to the end vertex: ");
         for (Vertex vertex : path) {
             if (vertex != null) {
@@ -205,8 +205,11 @@ public class HomeController implements Initializable {
      * Handle the click event on cycle button
      */
     public void cycleBtnOnClick() {
+        String beginVertString = showInputVertDialog();
+        Vertex beginVert = getVertByStringName(beginVertString);
+
         notiField.clear();
-        List<Vertex> cycle = graph.findMinimumWeightCycle(graph.getVertexes().getFirst());
+        List<Vertex> cycle = graph.findMinimumWeightCycle(beginVert);
         notiField.appendText("Minimum weight cycle from the first vertex: ");
         for (Vertex vertex : cycle) {
             if (vertex != null) {
@@ -220,8 +223,11 @@ public class HomeController implements Initializable {
      * Handle the click event on tree button
      */
     public void treeBtnOnClick() {
+        String beginVertString = showInputVertDialog();
+        Vertex beginVert = getVertByStringName(beginVertString);
+
         notiField.clear();
-        List<Edge> mst = graph.prim(graph.getVertexes().getFirst());
+        List<Edge> mst = graph.prim(beginVert);
 
         for (Edge edge : mst) {
             edge.getLineEdge().setStrokeWidth(3.0);
@@ -240,8 +246,7 @@ public class HomeController implements Initializable {
      * Handle the click event on save button
      */
     public void saveBtnOnClick(MouseEvent mouseEvent) {
-        File.graph = this.graph;
-        File.saveGraph(mouseEvent);
+        File.saveGraph(mouseEvent, this.graph);
     }
 
     /**
@@ -251,9 +256,8 @@ public class HomeController implements Initializable {
         mainPane.getChildren().clear();
         mainPane.getChildren().add(canvas);
 
-        File.graph = this.graph;
         File.mainPane = this.mainPane;
-        File.loadGraph(mouseEvent);
+        File.loadGraph(mouseEvent, graph);
         resetVisitedVert();
     }
 
@@ -444,57 +448,70 @@ public class HomeController implements Initializable {
      * @param endVert end vertex
      */
     private void showInputWeightDialog(Vertex beginVert, Vertex endVert) {
-        /*
-            Create a dialog and set its properties
-         */
+    /*
+        Create a dialog and set its properties
+     */
         TextInputDialog dialog = new TextInputDialog("1");
         dialog.setTitle("Nhập trọng số cung!");
         dialog.setHeaderText(null);
         dialog.setContentText("Xin mời nhập trọng số cung: ");
 
-        dialog.showAndWait().ifPresent(value -> {
-            try {
-                int intValue = Integer.parseInt(value); // the entered value
-                if (intValue > 0) {
+        dialog.setOnShown(event -> {
+            Platform.runLater(() -> dialog.getEditor().selectAll());
+        });
+
+        while (true) {
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                String value = result.get();
+                try {
+                    int intValue = Integer.parseInt(value); // the entered value
+                    if (intValue > 0) {
                     /*
                         Create an edge and set their properties
                      */
-                    Edge edge = new Edge();
-                    edge.setLineEdge(addEdge(beginVert.getVertLabel(), endVert.getVertLabel()));
-                    edge.setBeginVert(beginVert);
-                    edge.setEndVert(endVert);
-                    edge.setWeight(intValue);
+                        Edge edge = new Edge();
+                        edge.setLineEdge(addEdge(beginVert.getVertLabel(), endVert.getVertLabel()));
+                        edge.setBeginVert(beginVert);
+                        edge.setEndVert(endVert);
+                        edge.setWeight(intValue);
 
-                    graph.getEdges().add(edge);
+                        graph.getEdges().add(edge);
 
-                    double[] edgeCoordinates = calculateCoordinates(beginVert.getVertLabel(), endVert.getVertLabel(), RADIUS);
+                        double[] edgeCoordinates = calculateCoordinates(beginVert.getVertLabel(), endVert.getVertLabel(), RADIUS);
 
                     /*
                         Create a label representing for edge weight
                      */
-                    Label weightLabel = new Label();
-                    weightLabel.getStyleClass().add("weightLabel");
-                    weightLabel.setText(Integer.toString(intValue));
-                    weightLabel.setLayoutX((edgeCoordinates[0] + edgeCoordinates[2]) / 2);
-                    weightLabel.setLayoutY((edgeCoordinates[1] + edgeCoordinates[3]) / 2);
+                        Label weightLabel = new Label();
+                        weightLabel.getStyleClass().add("weightLabel");
+                        weightLabel.setText(Integer.toString(intValue));
+                        weightLabel.setLayoutX((edgeCoordinates[0] + edgeCoordinates[2]) / 2);
+                        weightLabel.setLayoutY((edgeCoordinates[1] + edgeCoordinates[3]) / 2);
 
-                    edge.setWeightLabel(weightLabel);
+                        edge.setWeightLabel(weightLabel);
 
-                    mainPane.getChildren().add(weightLabel);
-                    addEventToWeight(weightLabel);
+                        mainPane.getChildren().add(weightLabel);
+                        addEventToWeight(weightLabel);
+
+                        // Break the loop if input is valid
+                        break;
+                    } else {
+                        showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên lớn hơn 0!");
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên hợp lệ!");
                 }
-                else {
-                    showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên lớn hơn 0!");
-                }
+            } else {
+                // Break the loop if dialog is cancelled
+                break;
             }
-            catch (NumberFormatException e) {
-                showAlert("Đầu vào không hợp lệ", "Hãy nhập một số nguyên hợp lệ!");
-            }
-        });
+        }
     }
 
+
     /**
-     * Show dialog allowing user to input the specified vertex starting traversal algorithm.
+     * Show dialog allowing user to input the specified vertex.
      * @return vertex name
      */
     private String showInputVertDialog() {
@@ -510,6 +527,82 @@ public class HomeController implements Initializable {
 
         return dialog.showAndWait().get();
     }
+
+    /**
+     * Show dialog allowing user to input the specified vertexes.
+     * @return vertex name
+     */
+    private List<String> showInputVertexesDialog() {
+        List<Vertex> vertexes = graph.getVertexes();
+        List<String> vertexNames = new ArrayList<>();
+        for (Vertex v : vertexes) {
+            vertexNames.add(v.getName());
+        }
+
+        Dialog<List<String>> dialog = new Dialog<>();
+        dialog.setTitle("Chọn đỉnh bắt đầu và kết thúc");
+        dialog.setHeaderText(null);
+
+        // Tạo các label
+        Label startLabel = new Label("Đỉnh bắt đầu:\t");
+        Label endLabel = new Label("Đỉnh kết thúc:\t");
+
+        // Tạo choice box cho đỉnh bắt đầu và kết thúc
+        ChoiceBox<String> startChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(vertexNames));
+        ChoiceBox<String> endChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(vertexNames));
+
+        // Thêm listener để loại bỏ đỉnh đã chọn ở đỉnh bắt đầu khỏi đỉnh kết thúc
+        startChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                endChoiceBox.getItems().remove(newValue);
+            }
+        });
+
+        // Thêm các control vào grid pane
+        GridPane grid = new GridPane();
+        grid.add(startLabel, 0, 0);
+        grid.add(startChoiceBox, 1, 0);
+        grid.add(endLabel, 0, 1);
+        grid.add(endChoiceBox, 1, 1);
+
+        // Đảm bảo các control sẽ tự động mở rộng để đồng bộ với kích thước cửa sổ
+        GridPane.setHgrow(startChoiceBox, Priority.ALWAYS);
+        GridPane.setHgrow(endChoiceBox, Priority.ALWAYS);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Tạo button cho dialog
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Xác nhận khi người dùng chọn OK
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                String startVertex = startChoiceBox.getValue();
+                String endVertex = endChoiceBox.getValue();
+
+                if (startVertex == null || endVertex == null) {
+                    // Hiển thị cảnh báo nếu người dùng không chọn cả hai đỉnh
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Lỗi");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Vui lòng chọn cả hai đỉnh.");
+                    alert.showAndWait();
+                    return null;
+                }
+
+                List<String> result = new ArrayList<>();
+                result.add(startVertex);
+                result.add(endVertex);
+                return result;
+            }
+            return null;
+        });
+
+        // Hiển thị dialog và lấy kết quả
+        Optional<List<String>> result = dialog.showAndWait();
+        return result.orElse(null);
+    }
+
 
     /**
      * Add vertex to vertexes list and create vertex label
@@ -724,7 +817,7 @@ public class HomeController implements Initializable {
      * Add event to the specified vertex
      * @param vertLabel vertex label
      */
-    private void addEventToVert(Label vertLabel) {
+    public void addEventToVert(Label vertLabel) {
         vertLabel.setOnMouseClicked(this::vertOnClick);
         vertLabel.setOnMousePressed(this::vertOnPress);
         vertLabel.setOnMouseDragged(this::vertOnDrag);
@@ -816,5 +909,20 @@ public class HomeController implements Initializable {
         for (Vertex vertex : graph.getVertexes()) {
             vertex.setVisited(false);
         }
+    }
+
+    /**
+     * get vertex by name of vertex
+     * @param name name of vertex
+     * @return vertex
+     */
+    public Vertex getVertByStringName(String name) {
+        Vertex resultVert = new Vertex();
+        for (Vertex vertex : graph.getVertexes()) {
+            if (Objects.equals(vertex.getName(), name)) {
+                resultVert = vertex;
+            }
+        }
+        return resultVert;
     }
 }
