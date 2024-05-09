@@ -35,7 +35,7 @@ public abstract class Graph {
         vertName.clear();
         colors.clear();
 
-        for (int i = 100; i >= 1; i --) {
+        for (int i = 100; i >= 1; i--) {
             vertName.add(String.valueOf(i));
         }
     }

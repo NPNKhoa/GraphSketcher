@@ -17,7 +17,7 @@ public class UndirectedGraph extends Graph {
     @Override
     public List<Edge> getAllEdgesByVert(Vertex vertex) {
         List<Edge> edgeList = new ArrayList<>();
-        for (Edge edge : edges) {
+        for (Edge edge : getEdges()) {
             if (edge.getBeginVert() == vertex || edge.getEndVert() == vertex) {
                 edgeList.add(edge);
             }

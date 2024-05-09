@@ -57,6 +57,8 @@ public class HomeController implements Initializable {
     @FXML
     public  Button resetBtn;
     @FXML
+    public  Button undoBtn;
+    @FXML
     public  Button travelBtn;
     @FXML
     public  Button pathBtn;
@@ -75,11 +77,13 @@ public class HomeController implements Initializable {
     private Label selectedVertLabel = null;
     private Line temporaryLine = null;
     private Graph graph;
+    private Stack<Graph> history;
     private final int RADIUS = 30;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         graph = new UndirectedGraph();
+        history = new Stack<>();
         setDefaultBtnState();
 
         /*
@@ -152,9 +156,26 @@ public class HomeController implements Initializable {
      * Handle the click event on reset button
      */
     public void resetBtnOnClick() {
+        history.push(createCopyGraph());
         graph.resetGraph();
         mainPane.getChildren().clear();
         mainPane.getChildren().add(canvas);
+    }
+
+    public void undoBtnOnClick() {
+        graph = history.pop();
+        loadGraphFromHistory(graph);
+
+//        for (Vertex vertex : graph.getVertexes()) {
+//            System.out.println(vertex.getName() + " " + vertex);
+//        }
+//
+//        for (Edge edge : graph.getEdges()) {
+//            System.out.println(edge.getBeginVert().getName() + " (" + edge.getBeginVert() + ") "
+//                    + edge.getEndVert().getName() + " (" + edge.getEndVert() + ")");
+//        }
+        notiField.clear();
+        notiField.appendText("Undo successfully!");
     }
 
     /**
@@ -257,6 +278,7 @@ public class HomeController implements Initializable {
         mainPane.getChildren().add(canvas);
 
         File.mainPane = this.mainPane;
+        File.homeController = this;
         File.loadGraph(mouseEvent, graph);
         resetVisitedVert();
     }
@@ -279,6 +301,7 @@ public class HomeController implements Initializable {
      */
     public void vertOnClick(MouseEvent mouseEvent) {
         if (isEnableDelete) {
+            history.push(this.graph);
             Label clickedVertLabel = (Label) mouseEvent.getSource();
             Vertex clickedVertex = graph.findVertByLabel(clickedVertLabel);
             List<Edge> edgeList = graph.getAllEdgesByVert(clickedVertex);
@@ -831,6 +854,7 @@ public class HomeController implements Initializable {
     public void addEventToEdge(Line edgeLine) {
         edgeLine.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1 && isEnableDelete) {
+                history.push(this.graph);
                 deleteEdge(edgeLine);
             }
         });
@@ -924,5 +948,45 @@ public class HomeController implements Initializable {
             }
         }
         return resultVert;
+    }
+
+    private Graph createCopyGraph() {
+        Graph copyGraph = new UndirectedGraph();
+        List<Vertex> vertexes = new ArrayList<>(graph.getVertexes());
+        List<Edge> edges = new ArrayList<>(graph.getEdges());
+
+        for (Vertex vertex : vertexes) {
+            copyGraph.getVertexes().add(vertex);
+            copyGraph.getVertName().removeLast();
+        }
+
+        for (Edge edge : edges) {
+            copyGraph.getEdges().add(edge);
+        }
+
+        return copyGraph;
+    }
+
+    private void loadGraphFromHistory(Graph loadedGraph) {
+        mainPane.getChildren().clear();
+        mainPane.getChildren().add(canvas);
+
+        List<Vertex> vertexes = loadedGraph.getVertexes();
+        List<Edge> edges = loadedGraph.getEdges();
+
+        for (Vertex vertex : vertexes) {
+            Label vertLabel = vertex.getVertLabel();
+            mainPane.getChildren().add(vertLabel);
+            addEventToVert(vertLabel);
+        }
+
+        for (Edge edge : edges) {
+            Line edgeLine = edge.getLineEdge();
+            Label weightLabel = edge.getWeightLabel();
+            mainPane.getChildren().add(edgeLine);
+            mainPane.getChildren().add(weightLabel);
+            addEventToEdge(edgeLine);
+            addEventToWeight(weightLabel);
+        }
     }
 }

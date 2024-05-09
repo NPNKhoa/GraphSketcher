@@ -18,7 +18,7 @@ import javafx.stage.FileChooser;
 import java.io.*;
 
 public class File {
-    public static HomeController homeController = new HomeController();
+    public static HomeController homeController;
     public static Pane mainPane;
 
     /**

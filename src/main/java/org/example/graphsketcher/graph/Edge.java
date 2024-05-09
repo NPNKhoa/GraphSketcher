@@ -30,6 +30,14 @@ public class Edge {
         this.weightLabel = new Label(String.valueOf(weight));
     }
 
+    public Edge(Edge edge) {
+        this.beginVert = edge.beginVert;
+        this.endVert = edge.endVert;
+        this.weight = edge.weight;
+        this.weightLabel = edge.weightLabel;
+        this.lineEdge = edge.lineEdge;
+    }
+
     /**
      * getter: Get begin vertex
      */
