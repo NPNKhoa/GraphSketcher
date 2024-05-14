@@ -165,15 +165,6 @@ public class HomeController implements Initializable {
     public void undoBtnOnClick() {
         graph = history.pop();
         loadGraphFromHistory(graph);
-
-//        for (Vertex vertex : graph.getVertexes()) {
-//            System.out.println(vertex.getName() + " " + vertex);
-//        }
-//
-//        for (Edge edge : graph.getEdges()) {
-//            System.out.println(edge.getBeginVert().getName() + " (" + edge.getBeginVert() + ") "
-//                    + edge.getEndVert().getName() + " (" + edge.getEndVert() + ")");
-//        }
         notiField.clear();
         notiField.appendText("Undo successfully!");
     }
@@ -182,19 +173,14 @@ public class HomeController implements Initializable {
      * Handle the click event on travel button
      */
     public void travelBtnOnClick() {
+        resetBackgroundColor();
+        resetLineColor();
         String beginVertString = showInputVertDialog();
         Vertex beginVert = getVertByStringName(beginVertString);
         List<Vertex> traveledVert = graph.depthFirstSearch(beginVert);
-        Color color = new Color(0.32, 1.0, 0.1, 1.0);
-        BackgroundFill backgroundFill = new BackgroundFill(color, new CornerRadii(10.0, true), null);
 
-        double delay = 1.0;
         for (Vertex vert : traveledVert) {
-            PauseTransition pause = new PauseTransition(javafx.util.Duration.seconds(delay));
-            pause.setOnFinished(e -> {
-                vert.getVertLabel().setBackground(new Background(backgroundFill));
-            });
-//            vert.getVertLabel().setBackground(new Background(backgroundFill));
+            vert.getVertLabel().setBackground(generateBackgroundColor(new Color(0.32, 1.0, 0.1, 1.0)));
         }
         notiField.setText("Kết quả duyệt đồ thị: ");
         for (Vertex vert : traveledVert) {
@@ -207,15 +193,18 @@ public class HomeController implements Initializable {
      * Handle the click event on path button
      */
     public void pathBtnOnClick() {
+        resetBackgroundColor();
+        resetLineColor();
         List<String> inputVertexes = showInputVertexesDialog();
         Vertex beginVert = getVertByStringName(inputVertexes.getFirst());
         Vertex endVert = getVertByStringName(inputVertexes.getLast());
 
         notiField.clear();
         List<Vertex> path = graph.dijsktra(beginVert, endVert);
-        notiField.appendText("Shortest path from the start vertex to the end vertex: ");
+        notiField.appendText("Đường đi ngắn nhất tìm được: ");
         for (Vertex vertex : path) {
             if (vertex != null) {
+                vertex.getVertLabel().setBackground(generateBackgroundColor(new Color(0.32, 1.0, 0.1, 1.0)));
                 notiField.appendText(vertex.getName() + " ");
             }
         }
@@ -226,14 +215,17 @@ public class HomeController implements Initializable {
      * Handle the click event on cycle button
      */
     public void cycleBtnOnClick() {
+        resetBackgroundColor();
+        resetLineColor();
         String beginVertString = showInputVertDialog();
         Vertex beginVert = getVertByStringName(beginVertString);
 
         notiField.clear();
         List<Vertex> cycle = graph.findMinimumWeightCycle(beginVert);
-        notiField.appendText("Minimum weight cycle from the first vertex: ");
+        notiField.appendText("Chu trình với trọng số nhỏ nhất tìm được: ");
         for (Vertex vertex : cycle) {
             if (vertex != null) {
+                vertex.getVertLabel().setBackground(generateBackgroundColor(new Color(0.32, 1.0, 0.1, 1.0)));
                 notiField.appendText(vertex.getName() + " ");
             }
         }
@@ -244,6 +236,8 @@ public class HomeController implements Initializable {
      * Handle the click event on tree button
      */
     public void treeBtnOnClick() {
+        resetBackgroundColor();
+        resetLineColor();
         String beginVertString = showInputVertDialog();
         Vertex beginVert = getVertByStringName(beginVertString);
 
@@ -255,9 +249,9 @@ public class HomeController implements Initializable {
             edge.getLineEdge().setStroke(Color.RED);
         }
 
-        notiField.appendText("Minimum spanning tree in the graph: ");
+        notiField.appendText("Cây khung nhỏ nhất trong đồ thị: ");
         for (Edge edge : mst) {
-            notiField.appendText( "Edge (" + edge.getBeginVert().getName()
+            notiField.appendText( "Cung (" + edge.getBeginVert().getName()
                     + ", " + edge.getEndVert().getName() + ") ");
         }
         resetVisitedVert();
@@ -673,6 +667,7 @@ public class HomeController implements Initializable {
      * @param vertLabel vertex label
      */
     public void deleteVert(Label vertLabel) {
+        history.push(createCopyGraph());
         Vertex vertex = graph.findVertByLabel(vertLabel);
         graph.getVertName().add(vertex.getName());
         // Lambda expression to sort vertName list
@@ -707,6 +702,7 @@ public class HomeController implements Initializable {
      * @param edgeLine edge line
      */
     public void deleteEdge(Line edgeLine) {
+        history.push(createCopyGraph());
         Edge edge = graph.getEdgeByEdgeLine(edgeLine);
         graph.getEdges().remove(edge);
         mainPane.getChildren().remove(edgeLine);
@@ -987,6 +983,25 @@ public class HomeController implements Initializable {
             mainPane.getChildren().add(weightLabel);
             addEventToEdge(edgeLine);
             addEventToWeight(weightLabel);
+        }
+    }
+
+    private Background generateBackgroundColor(Color color) {
+        BackgroundFill backgroundFill = new BackgroundFill(color, new CornerRadii(10.0, true), null);
+        return new Background(backgroundFill);
+    }
+
+    private void resetBackgroundColor() {
+        Background background = new Background(new BackgroundFill(Color.WHITE, new CornerRadii(10.0, true), null));
+        for (Vertex vertex : graph.getVertexes()) {
+            vertex.getVertLabel().setBackground(background);
+        }
+    }
+
+    private void resetLineColor() {
+        for (Edge edge : graph.getEdges()) {
+            edge.getLineEdge().setStroke(Color.BLACK);
+            edge.getLineEdge().setStrokeWidth(1.0);
         }
     }
 }

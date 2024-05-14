@@ -36,6 +36,8 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <GridPane.margin>
             <Insets left="140.0" top="30.0" />
@@ -131,6 +133,33 @@
             <Label text="Thực hiện chức năng &quot;Tìm chu trình với trọng số nhỏ nhất&quot;" GridPane.columnIndex="3" GridPane.rowIndex="2" />
             <Label text="Thực hiện chức năng &quot;Tìm cây phủ tối thiểu&quot;" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Label text="Thực hiện chức năng &quot;Tìm bộ phận liên thông&quot;" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="5">
+               <image>
+                  <Image url="@../assets/save_btn.png" />
+               </image>
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </ImageView>
+            <Label text="Lưu đồ thị" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.rowIndex="5">
+               <image>
+                  <Image url="@../assets/open_btn.png" />
+               </image>
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </ImageView>
+            <Label text="Mở đồ thị từ tập tin" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="6">
+               <image>
+                  <Image url="@../assets/undo_btn.png" />
+               </image>
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </ImageView>
+            <Label text="Quay lại trạng thái trước khi xóa một phần từ (Undo)" GridPane.columnIndex="1" GridPane.rowIndex="6" />
          </children>
       </GridPane>
       <Label prefHeight="33.0" prefWidth="680.0" text="LƯU Ý: Để thay đổi trọng số cung, double-click vào trọng số cần thay đổi" GridPane.columnIndex="1" GridPane.rowIndex="2">
