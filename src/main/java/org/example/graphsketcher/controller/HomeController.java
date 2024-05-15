@@ -221,7 +221,7 @@ public class HomeController implements Initializable {
         Vertex beginVert = getVertByStringName(beginVertString);
 
         notiField.clear();
-        List<Vertex> cycle = graph.findMinimumWeightCycle(beginVert);
+        List<Vertex> cycle = graph.minimumWeightGreedy(beginVert);
         notiField.appendText("Chu trình với trọng số nhỏ nhất tìm được: ");
         for (Vertex vertex : cycle) {
             if (vertex != null) {
@@ -270,6 +270,10 @@ public class HomeController implements Initializable {
     public void openBtnOnClick(MouseEvent mouseEvent) {
         mainPane.getChildren().clear();
         mainPane.getChildren().add(canvas);
+
+        for (Vertex vertex : graph.getVertexes()) {
+            graph.getVertName().add(vertex.getName());
+        }
 
         File.mainPane = this.mainPane;
         File.homeController = this;

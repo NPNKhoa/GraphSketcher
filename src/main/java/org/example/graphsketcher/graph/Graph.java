@@ -105,16 +105,17 @@ public abstract class Graph {
     public List<Vertex> dijsktra(Vertex startVert, Vertex endVert) {
         Map<Vertex, Integer> distance = new HashMap<>();
         Map<Vertex, Vertex> previous = new HashMap<>();
-        Queue<Vertex> unvisitedVert = getUnvisitedVert();
+        PriorityQueue<Vertex> unvisitedVert = new PriorityQueue<>(Comparator.comparingInt(distance::get));
 
         if (Integer.parseInt(startVert.getName()) > Integer.parseInt(endVert.getName())) {
-            unvisitedVert = getUnvisitedVertReverse();
+            unvisitedVert = new PriorityQueue<>(Comparator.comparingInt(distance::get).reversed());
         }
 
         // Initialize distances
         for (Vertex vertex : vertexes) {
             distance.put(vertex, vertex == startVert ? 0 : INFINITY);
             previous.put(vertex, null);
+            unvisitedVert.add(vertex);
         }
 
         while (!unvisitedVert.isEmpty()) {
@@ -128,6 +129,8 @@ public abstract class Graph {
                 if (newDistance < distance.get(neighbor)) {
                     distance.put(neighbor, newDistance);
                     previous.put(neighbor, currentVert);
+                    unvisitedVert.remove(neighbor);
+                    unvisitedVert.add(neighbor);
                 }
             }
         }
@@ -160,6 +163,45 @@ public abstract class Graph {
         edges.addAll(copyEdges);
         return cycle;
     }
+
+    public List<Vertex> minimumWeightGreedy(Vertex startVert) {
+        List<Edge> copyEdges = new ArrayList<>(edges);
+        List<Vertex> result = new ArrayList<>();
+        Set<Vertex> visitedVertices = new HashSet<>();
+        Vertex currentVert = startVert;
+
+        while (visitedVertices.size() < vertexes.size()) {
+            result.add(currentVert);
+            visitedVertices.add(currentVert);
+
+            int minWeight = Integer.MAX_VALUE;
+            Edge minEdge = null;
+
+            List<Edge> edgesFromCurrentVert = getAllEdgesByVert(currentVert);
+            for (Edge edge : edgesFromCurrentVert) {
+                Vertex nextVert = edge.getOppositeVert(currentVert);
+                if (!visitedVertices.contains(nextVert) && edge.getWeight() < minWeight) {
+                    minWeight = edge.getWeight();
+                    minEdge = edge;
+                }
+            }
+
+            if (minEdge != null) {
+                currentVert = minEdge.getOppositeVert(currentVert);
+            } else {
+                // Nếu không tìm thấy cạnh để đi tiếp, quay lại đỉnh đầu tiên
+                currentVert = startVert;
+                result.add(currentVert);
+                visitedVertices.add(currentVert);
+            }
+        }
+
+        edges = copyEdges;
+        return result;
+    }
+
+
+
 
     /**
      * Prim algorithm to find minimum spanning tree

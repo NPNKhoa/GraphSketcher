@@ -107,4 +107,13 @@ public class Edge {
     public void setLineEdge(Line lineEdge) {
         this.lineEdge = lineEdge;
     }
+
+    public Vertex getOppositeVert(Vertex vertex) {
+        if (vertex == beginVert) {
+            return endVert;
+        } else if (vertex == endVert) {
+            return beginVert;
+        }
+        return null;
+    }
 }
